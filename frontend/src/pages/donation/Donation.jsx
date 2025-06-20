@@ -127,7 +127,7 @@ function Donation() {
 
   return (
     <div className="max-w-xl mx-auto mt-12 px-6 py-8 bg-white shadow-xl rounded-xl border">
-      <h2 className="text-2xl font-bold mb-6 text-center text-blue-800">Submit a Donation Request</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#0052CC' }}>Submit a Donation Request</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Donation Type */}
@@ -335,9 +335,10 @@ function Donation() {
           <button
             type="submit"
             disabled={loading}
-            className={`font-semibold py-3 px-8 rounded-md transition-colors ${
-              loading ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'
+            className={`font-semibold py-3 px-8 rounded-md transition-colors text-white ${
+              loading ? 'bg-gray-400 cursor-not-allowed' : 'hover:opacity-90'
             }`}
+            style={{ backgroundColor: loading ? '' : '#0052CC' }}
           >
             {loading ? 'Submitting...' : 'Submit Donation Request'}
           </button>
@@ -349,8 +350,12 @@ function Donation() {
             className={`text-center mt-4 text-sm rounded-md p-3 ${
               message.includes('✅')
                 ? 'text-green-800 bg-green-100 border border-green-200'
-                : 'text-red-800 bg-red-100 border border-red-200'
+                : 'text-white border'
             }`}
+            style={{ 
+              backgroundColor: message.includes('✅') ? '' : '#DC2625',
+              borderColor: message.includes('✅') ? '' : '#DC2625'
+            }}
           >
             {message}
           </div>

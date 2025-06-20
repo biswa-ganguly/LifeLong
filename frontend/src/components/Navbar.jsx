@@ -24,11 +24,7 @@ function Navbar() {
           <div className="hidden md:flex items-center gap-6">
             <Link to="/donation">Donation</Link>
             
-            {isSignedIn ? (
-              <Link to={`/dashboard/user/${user?.id}`}>Dashboard</Link>
-            ) : (
-              <Link to="/dashboard">Dashboard</Link>
-            )}
+            <Link to={isSignedIn ? `/dashboard/user/${user?.id}` : "/dashboard/user"}>Dashboard</Link>
             
             <Link to="/emergency">
               <button className="bg-[#E53935] hover:bg-red-700 text-white px-4 py-2 rounded-md shadow">
@@ -70,11 +66,7 @@ function Navbar() {
           <div className="flex flex-col p-4 gap-4">
             <Link to="/donation" onClick={() => setIsMenuOpen(false)}>Donation</Link>
             
-            {isSignedIn ? (
-              <Link to={`/dashboard/user/${user?.id}`} onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
-            ) : (
-              <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
-            )}
+            <Link to={isSignedIn ? `/dashboard/user/${user?.id}` : "/dashboard/user"} onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
             
             <Link to="/emergency" onClick={() => setIsMenuOpen(false)}>
               <button className="bg-[#E53935] hover:bg-red-700 text-white px-4 py-2 rounded-md w-full text-left">
