@@ -8,6 +8,8 @@ export function searchHospitalsByName(query) {
   const hospitals = getCachedHospitals();
 
   return hospitals.filter(hospital =>
-    hospital.name.toLowerCase().includes(lowerQuery)
+    hospital.name.toLowerCase().includes(lowerQuery) ||
+    (hospital.type && hospital.type.toLowerCase().includes(lowerQuery)) ||
+    (hospital.city && hospital.city.toLowerCase().includes(lowerQuery))
   );
 }

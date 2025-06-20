@@ -5,32 +5,65 @@ import jwt from "jsonwebtoken";
 // Register Hospital
 export const createHospital = async (req, res) => {
   try {
-    const { name, address, phone, email, username, password } = req.body;
+    const {
+      name,
+      type,
+      registrationNumber,
+      nabhNumber,
+      email,
+      phone,
+      emergencyContact,
+      address,
+      admin,
+      facilities,
+      departments,
+      documents,
+      description
+    } = req.body;
 
-    if (!name || !address || !phone || !email || !username || !password) {
-      return res.status(400).json({ message: 'All fields are required!' });
+    // Validate required fields
+    if (!name || !type || !registrationNumber || !email || !phone || !address || !admin) {
+      return res.status(400).json({ message: 'Missing required fields!' });
     }
-  
-    const existingUsername = await NewHospitals.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: 'Username already taken!' });
+    // Validate nested address
+    const addressFields = ["line", "city", "state", "pincode"];
+    for (const field of addressFields) {
+      if (!address[field]) {
+        return res.status(400).json({ message: `Address field '${field}' is required!` });
+      }
     }
-  
+    // Validate nested admin
+    const adminFields = ["name", "email", "phone"];
+    for (const field of adminFields) {
+      if (!admin[field]) {
+        return res.status(400).json({ message: `Admin field '${field}' is required!` });
+      }
+    }
+    // Check for unique registrationNumber and email
+    const existingRegNum = await NewHospitals.findOne({ registrationNumber });
+    if (existingRegNum) {
+      return res.status(400).json({ message: 'Registration number already registered!' });
+    }
     const existingEmail = await NewHospitals.findOne({ email });
     if (existingEmail) {
       return res.status(400).json({ message: 'Email already registered!' });
     }
-  
-    const hashed = await bcrypt.hash(password, 10);
-    const hospital = await NewHospitals.create({ 
-      name, 
-      address, 
-      phone, 
-      email, 
-      username, 
-      password: hashed 
+    // Create hospital
+    const hospital = await NewHospitals.create({
+      name,
+      type,
+      registrationNumber,
+      nabhNumber,
+      email,
+      phone,
+      emergencyContact,
+      address,
+      admin,
+      facilities,
+      departments,
+      documents,
+      description
     });
-
     res.status(201).json({ message: 'Hospital registered successfully!', hospital });
   } catch (error) {
     res.status(500).json({ message: 'Server Error!', error: error.toString() });
@@ -40,24 +73,17 @@ export const createHospital = async (req, res) => {
 //Login Hospital
 export const hospitalLogin = async (req, res) => {
   try {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({ message: "Username and password are required!" });
+    const { registrationNumber } = req.body;
+    // For demo, login by registrationNumber (or you can use email/other field)
+    if (!registrationNumber) {
+      return res.status(400).json({ message: "Registration number is required!" });
     }
-  
-    const hospital = await NewHospitals.findOne({ username });
+    const hospital = await NewHospitals.findOne({ registrationNumber });
     if (!hospital) {
       return res.status(400).json({ message: "Invalid credentials!" });
     }
-  
-    const match = await bcrypt.compare(password, hospital.password);
-    if (!match) {
-      return res.status(400).json({ message: "Invalid credentials!" });
-    }
-  
+    // You can add password check if you add password field
     const token = jwt.sign({ id: hospital._id, role:'hospital' }, process.env.HOSPITAL_SECRET_KEY, { expiresIn:'1h' });
-
     res.json({ message: "Login successful!", token });
   } catch (error) {
     res.status(500).json({ message: "Server Error!", error: error.toString() });

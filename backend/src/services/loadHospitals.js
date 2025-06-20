@@ -9,10 +9,13 @@ export let hospitalsCache = [];
  */
 export async function loadHospitalsAtStartup() {
   try {
-    const hospitals = await NewHospitals.find({}, "_id name"); // only fetch ID and name
+    const hospitals = await NewHospitals.find({}, "_id name type registrationNumber address.city");
     hospitalsCache = hospitals.map((h) => ({
       id: h._id.toString(),
       name: h.name,
+      type: h.type,
+      registrationNumber: h.registrationNumber,
+      city: h.address?.city || ""
     }));
     console.log(`✅ Loaded ${hospitalsCache.length} hospitals into memory.`);
     console.log(hospitalsCache)
