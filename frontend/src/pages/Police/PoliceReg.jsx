@@ -32,6 +32,8 @@ export default function PoliceStationRegistrationForm() {
     password: ""
   });
 
+  const [detectingAddress, setDetectingAddress] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Handle nested fields
@@ -100,6 +102,41 @@ export default function PoliceStationRegistrationForm() {
     }
   };
 
+  // Address auto-detect handler
+  const handleDetectAddress = async () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    setDetectingAddress(true);
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+        const data = await res.json();
+        const address = data.address || {};
+        setFormData((prev) => ({
+          ...prev,
+          address: {
+            ...prev.address,
+            line: data.display_name || "",
+            city: address.city || address.town || address.village || "",
+            district: address.county || address.state_district || "",
+            state: address.state || "",
+            pincode: address.postcode || ""
+          }
+        }));
+      } catch (err) {
+        alert("Failed to detect address. Please fill manually.");
+      } finally {
+        setDetectingAddress(false);
+      }
+    }, (err) => {
+      alert("Failed to get your location. Please allow location access or fill manually.");
+      setDetectingAddress(false);
+    });
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-6 shadow-xl">
       <h2 className="text-2xl font-bold mb-6">Police Station Registration Form</h2>
@@ -134,6 +171,14 @@ export default function PoliceStationRegistrationForm() {
         </div>
         <fieldset className="border p-2 rounded">
           <legend className="font-semibold">Address</legend>
+          <button
+            type="button"
+            className="mb-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+            onClick={handleDetectAddress}
+            disabled={detectingAddress}
+          >
+            {detectingAddress ? "Detecting..." : "Detect Address"}
+          </button>
           <div className="grid grid-cols-2 gap-2">
             <input type="text" name="address.line" value={formData.address.line} onChange={handleChange} required placeholder="Address Line" className="p-2 border rounded" />
             <input type="text" name="address.city" value={formData.address.city} onChange={handleChange} required placeholder="City" className="p-2 border rounded" />
