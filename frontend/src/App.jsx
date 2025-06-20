@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-function App() {
-  const [count, setCount] = useState(0)
+import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 
+
+
+import Donation from './pages/donation/Donation';
+import Emergency from './pages/emergency/Emergency';
+import SignInPage from './auth/sign-in';
+
+import UserDashboard from './pages/user/UserDashboard';
+import Home from './pages/home/Home';
+
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/sign-in" element={<SignInPage />} />
 
-export default App
+        <Route
+  path="/dashboard/user/:userId?"
+  element={
+    <ProtectedRoute>
+      <UserDashboard />
+    </ProtectedRoute>
+  }
+/>
+        <Route
+          path="/donation"
+          element={
+            <ProtectedRoute>
+              <Donation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/emergency"
+          element={
+            <ProtectedRoute>
+              <Emergency />
+            </ProtectedRoute>
+          }
+        />
+       
+
+         {/* <Route path="/register" element={<CommonRegistrationForm />} />
+  <Route path="/police/admin" element={<PoliceAdminDashboard />} />
+  <Route path="/hospital/admin" element={<HospitalAdminDashboard />} /> */}
+
+        {/* Catch-all route to redirect unknown paths to home */}
+        <Route path="*" element={<Navigate to="/" />} />
+
+        
+
+      </Routes>
+    </div>
+  );
+}
