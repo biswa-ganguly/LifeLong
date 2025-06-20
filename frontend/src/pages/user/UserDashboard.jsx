@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useEffect, useState } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react'; // ✅ useAuth to get token
 import { useNavigate, useParams } from 'react-router-dom';
@@ -100,3 +101,14 @@ function UserDashboard() {
 }
 
 export default UserDashboard;
+=======
+import React from 'react'
+
+function UserDashboard() {
+  return (
+    <div>UserDashboard</div>
+  )
+}
+
+export default UserDashboard
+>>>>>>> dfc13b7b59b82e6cae8d7d607ee736361cfb843b
