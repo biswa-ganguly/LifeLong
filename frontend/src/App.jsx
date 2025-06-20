@@ -13,11 +13,11 @@ import SignInPage from './auth/sign-in';
 import HospitalAdminDashboard from './pages/Hospital/AdminDashboard';
 import PoliceAdminDashboard from './pages/Police/PoliceAdminDashboard';
 import CommonRegistrationForm from './components/CommonRegistrationForm';
-import HospitalPoliceLogin from './pages/HospitalPoliceLogin';
+import HospitalPoliceLogin from './components/HospitalPoliceLogin';
 
 export default function App() {
   return (
-    <div>
+    <div className=''>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import HospitalRegistrationForm from "../pages/Hospital/HospitalReg";
 import PoliceStationRegistrationForm from "../pages/Police/PoliceReg";
-import HospitalPoliceLogin from "../pages/HospitalPoliceLogin";
+import HospitalPoliceLogin from "./HospitalPoliceLogin";
 
 export default function CommonAuthForm() {
   const [role, setRole] = useState(""); // 'police' or 'hospital'
