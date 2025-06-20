@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SMS Result</title>
+</head>
+<body>
+  <% if (success) { %>
+    <h1 style="color: green;">Success!</h1>
+    <p><%= message %></p>
+    <p>SID: <%= sid %></p>
+  <% } else { %>
+    <h1 style="color: red;">Error</h1>
+    <p><%= message %></p>
+  <% } %>
+  
+  <a href="/">Send another message</a>
+</body>
+</html>

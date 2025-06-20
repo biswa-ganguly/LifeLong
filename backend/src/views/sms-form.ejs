@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send SMS</title>
+</head>
+<body>
+  <h1>Send Test SMS</h1>
+  
+  <form action="/send-sms" method="POST">
+    <div>
+      <label for="phoneNumber">Phone Number:</label>
+      <input 
+        type="tel" 
+        id="phoneNumber" 
+        name="phoneNumber" 
+        value="<%= process.env.YOUR_VERIFIED_NUMBER %>"
+        required
+      >
+    </div>
+    
+    <div>
+      <label for="message">Message:</label>
+      <textarea 
+        id="message" 
+        name="message" 
+        rows="4"
+        required
+      >Hello from Twilio!</textarea>
+    </div>
+    
+    <button type="submit">Send SMS</button>
+  </form>
+</body>
+</html>
