@@ -4,7 +4,7 @@ import axios from "axios";
 
 export default function HospitalPoliceLogin({ role: propRole }) {
   const [role, setRole] = useState(propRole || "");
-  const [form, setForm] = useState({ registrationNumber: "", username: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -21,7 +21,8 @@ export default function HospitalPoliceLogin({ role: propRole }) {
       let res;
       if (role === "hospital") {
         res = await axios.post("http://localhost:3000/api/hospital/login", {
-          registrationNumber: form.registrationNumber,
+          username: form.username,
+          password: form.password,
         });
         localStorage.setItem("hospital_token", res.data.token);
         navigate(`/hospital/admin/${res.data?.hospitalId || ''}`);
@@ -66,20 +67,7 @@ export default function HospitalPoliceLogin({ role: propRole }) {
             </select>
           </div>
         )}
-        {role === "hospital" && (
-          <div>
-            <label className="block mb-2 font-semibold">Registration Number</label>
-            <input
-              type="text"
-              name="registrationNumber"
-              value={form.registrationNumber}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-        )}
-        {role === "police" && (
+        {(role === "hospital" || role === "police") && (
           <>
             <div>
               <label className="block mb-2 font-semibold">Username</label>
