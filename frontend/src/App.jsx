@@ -13,6 +13,7 @@ import SignInPage from './auth/sign-in';
 import HospitalAdminDashboard from './pages/Hospital/AdminDashboard';
 import PoliceAdminDashboard from './pages/Police/PoliceAdminDashboard';
 import CommonRegistrationForm from './components/CommonRegistrationForm';
+import HospitalPoliceLogin from './pages/HospitalPoliceLogin';
 
 export default function App() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
         
 
          <Route path="/register" element={<CommonRegistrationForm />} />
+          <Route path="/hospital-police-login" element={<HospitalPoliceLogin />} />
           <Route path="/police/admin" element={<PoliceAdminDashboard />} />
           <Route path="/hospital/admin/:hospitalId" element={<HospitalAdminDashboard />} />
 

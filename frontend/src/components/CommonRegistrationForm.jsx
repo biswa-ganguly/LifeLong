@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import HospitalRegistrationForm from "../pages/Hospital/HospitalReg";
 import PoliceStationRegistrationForm from "../pages/Police/PoliceReg";
+import HospitalPoliceLogin from "../pages/HospitalPoliceLogin";
 
 export default function CommonAuthForm() {
   const [role, setRole] = useState(""); // 'police' or 'hospital'
@@ -13,7 +13,7 @@ export default function CommonAuthForm() {
         Police / Hospital Portal
       </h2>
 
-      {/* Role selection */}
+      {/* Role selection (always visible) */}
       <div className="mb-4">
         <label className="font-semibold block mb-2">
           Select Role:
@@ -29,35 +29,39 @@ export default function CommonAuthForm() {
         </select>
       </div>
 
-      {/* Auth Type Selection */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          type="button"
-          className={`px-4 py-2 rounded ${
-            authType === "register" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setAuthType("register")}
-        >
-          Register
-        </button>
-        <button
-          type="button"
-          className={`px-4 py-2 rounded ${
-            authType === "login" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setAuthType("login")}
-        >
-          Login
-        </button>
-      </div>
+      {/* Auth Type Selection and Form (only if role is selected) */}
+      {role && (
+        <>
+          <div className="flex justify-center gap-4 mb-6">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${
+                authType === "register" ? "bg-blue-600 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => setAuthType("register")}
+            >
+              Register
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${
+                authType === "login" ? "bg-blue-600 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => setAuthType("login")}
+            >
+              Login
+            </button>
+          </div>
 
-      {/* Render the appropriate registration form */}
-      {authType === "register" && role === "police" && <PoliceStationRegistrationForm />}
-      {authType === "register" && role === "hospital" && <HospitalRegistrationForm />}
-      {authType === "login" && (
-        <div className="text-center text-gray-600 mt-8">
-          Login form not implemented here. Please use the dedicated login page.
-        </div>
+          {/* Render the appropriate registration or login form */}
+          {authType === "register" && role === "police" && <PoliceStationRegistrationForm />}
+          {authType === "register" && role === "hospital" && <HospitalRegistrationForm />}
+          {authType === "login" && (
+            <div className="mt-8">
+              <HospitalPoliceLogin role={role} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
