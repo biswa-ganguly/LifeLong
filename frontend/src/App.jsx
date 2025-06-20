@@ -49,8 +49,9 @@ export default function App() {
         
 
          <Route path="/register" element={<CommonRegistrationForm />} />
-  <Route path="/police/admin" element={<PoliceAdminDashboard />} />
-  <Route path="/hospital/admin" element={<HospitalAdminDashboard />} />
+          <Route path="/police/admin" element={<PoliceAdminDashboard />} />
+          <Route path="/hospital/admin/:hospitalId" element={<HospitalAdminDashboard />} />
+
 
         {/* Catch-all route to redirect unknown paths to home */}
         <Route path="*" element={<Navigate to="/" />} />
