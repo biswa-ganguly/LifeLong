@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const FACILITIES_OPTIONS = [
+  "ICU", "Emergency", "Pharmacy", "Ambulance", "Laboratory", "Operation Theatre", "Blood Bank", "Cafeteria", "Parking", "MRI", "CT Scan", "X-Ray", "Dialysis", "Physiotherapy", "Burn Unit", "NICU", "PICU"
+];
+const DEPARTMENTS_OPTIONS = [
+  "Cardiology", "Neurology", "Orthopedics", "Pediatrics", "Oncology", "Radiology",
+  "Gastroenterology", "Dermatology", "ENT", "General Surgery", "Urology", "Nephrology", "Ophthalmology", "Psychiatry", "Pulmonology", "Obstetrics & Gynecology", "Dentistry", "Pathology", "Anesthesiology"
+];
+
 export default function HospitalRegistrationForm() {
   const [formData, setFormData] = useState({
     name: "",
@@ -30,6 +38,11 @@ export default function HospitalRegistrationForm() {
     description: ""
   });
 
+  const [otherFacilityChecked, setOtherFacilityChecked] = useState(false);
+  const [otherFacility, setOtherFacility] = useState("");
+  const [otherDepartmentChecked, setOtherDepartmentChecked] = useState(false);
+  const [otherDepartment, setOtherDepartment] = useState("");
+
   // Helper for handling nested fields
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,17 +64,77 @@ export default function HospitalRegistrationForm() {
         ...prev,
         documents: { ...prev.documents, [key]: value }
       }));
-    } else if (name === "facilities" || name === "departments") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value.split(",").map((item) => item.trim()).filter(Boolean)
-      }));
     } else {
       setFormData((prev) => ({
         ...prev,
         [name]: value
       }));
     }
+  };
+
+  // Handle checkbox for facilities and departments
+  const handleCheckboxChange = (e, group) => {
+    const { value, checked } = e.target;
+    setFormData((prev) => {
+      const arr = prev[group] || [];
+      if (checked) {
+        return { ...prev, [group]: [...arr, value] };
+      } else {
+        return { ...prev, [group]: arr.filter((item) => item !== value) };
+      }
+    });
+  };
+
+  // Handle 'Other' checkbox for facilities
+  const handleOtherFacilityCheckbox = (e) => {
+    setOtherFacilityChecked(e.target.checked);
+    if (!e.target.checked) {
+      setOtherFacility("");
+      setFormData((prev) => ({
+        ...prev,
+        facilities: prev.facilities.filter((item) => item !== otherFacility)
+      }));
+    }
+  };
+
+  // Handle 'Other' input for facilities
+  const handleOtherFacilityInput = (e) => {
+    const value = e.target.value;
+    setOtherFacility(value);
+    setFormData((prev) => {
+      // Remove previous otherFacility if present
+      const filtered = prev.facilities.filter((item) => item !== otherFacility);
+      return {
+        ...prev,
+        facilities: value ? [...filtered, value] : filtered
+      };
+    });
+  };
+
+  // Handle 'Other' checkbox for departments
+  const handleOtherDepartmentCheckbox = (e) => {
+    setOtherDepartmentChecked(e.target.checked);
+    if (!e.target.checked) {
+      setOtherDepartment("");
+      setFormData((prev) => ({
+        ...prev,
+        departments: prev.departments.filter((item) => item !== otherDepartment)
+      }));
+    }
+  };
+
+  // Handle 'Other' input for departments
+  const handleOtherDepartmentInput = (e) => {
+    const value = e.target.value;
+    setOtherDepartment(value);
+    setFormData((prev) => {
+      // Remove previous otherDepartment if present
+      const filtered = prev.departments.filter((item) => item !== otherDepartment);
+      return {
+        ...prev,
+        departments: value ? [...filtered, value] : filtered
+      };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -96,6 +169,10 @@ export default function HospitalRegistrationForm() {
         },
         description: ""
       });
+      setOtherFacilityChecked(false);
+      setOtherFacility("");
+      setOtherDepartmentChecked(false);
+      setOtherDepartment("");
     } catch (err) {
       alert(err?.response?.data?.message || "Registration failed.");
     }
@@ -111,7 +188,11 @@ export default function HospitalRegistrationForm() {
         </div>
         <div>
           <label>Type</label>
-          <input type="text" name="type" value={formData.type} onChange={handleChange} required className="w-full p-2 border rounded" placeholder="e.g. Private, Government" />
+          <select name="type" value={formData.type} onChange={handleChange} required className="w-full p-2 border rounded">
+            <option value="">-- Select Type --</option>
+            <option value="Private">Private</option>
+            <option value="Government">Government</option>
+          </select>
         </div>
         <div>
           <label>Registration Number</label>
@@ -150,14 +231,76 @@ export default function HospitalRegistrationForm() {
             <input type="tel" name="admin.phone" value={formData.admin.phone} onChange={handleChange} required placeholder="Admin Phone" className="p-2 border rounded" />
           </div>
         </fieldset>
-        <div>
-          <label>Facilities (comma separated)</label>
-          <input type="text" name="facilities" value={formData.facilities.join(", ")} onChange={handleChange} placeholder="e.g. ICU, Emergency, Pharmacy" className="w-full p-2 border rounded" />
-        </div>
-        <div>
-          <label>Departments (comma separated)</label>
-          <input type="text" name="departments" value={formData.departments.join(", ")} onChange={handleChange} placeholder="e.g. Cardiology, Neurology" className="w-full p-2 border rounded" />
-        </div>
+        <fieldset className="border p-2 rounded">
+          <legend className="font-semibold">Facilities</legend>
+          <div className="flex flex-wrap gap-4">
+            {FACILITIES_OPTIONS.map((facility) => (
+              <label key={facility} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="facilities"
+                  value={facility}
+                  checked={formData.facilities.includes(facility)}
+                  onChange={(e) => handleCheckboxChange(e, "facilities")}
+                />
+                {facility}
+              </label>
+            ))}
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="facilitiesOther"
+                checked={otherFacilityChecked}
+                onChange={handleOtherFacilityCheckbox}
+              />
+              Other
+            </label>
+            {otherFacilityChecked && (
+              <input
+                type="text"
+                className="border rounded p-1"
+                placeholder="Other facility"
+                value={otherFacility}
+                onChange={handleOtherFacilityInput}
+              />
+            )}
+          </div>
+        </fieldset>
+        <fieldset className="border p-2 rounded">
+          <legend className="font-semibold">Departments</legend>
+          <div className="flex flex-wrap gap-4">
+            {DEPARTMENTS_OPTIONS.map((dept) => (
+              <label key={dept} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="departments"
+                  value={dept}
+                  checked={formData.departments.includes(dept)}
+                  onChange={(e) => handleCheckboxChange(e, "departments")}
+                />
+                {dept}
+              </label>
+            ))}
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="departmentsOther"
+                checked={otherDepartmentChecked}
+                onChange={handleOtherDepartmentCheckbox}
+              />
+              Other
+            </label>
+            {otherDepartmentChecked && (
+              <input
+                type="text"
+                className="border rounded p-1"
+                placeholder="Other department"
+                value={otherDepartment}
+                onChange={handleOtherDepartmentInput}
+              />
+            )}
+          </div>
+        </fieldset>
         <fieldset className="border p-2 rounded">
           <legend className="font-semibold">Documents (URLs)</legend>
           <div className="grid grid-cols-2 gap-2">
