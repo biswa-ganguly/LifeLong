@@ -3,6 +3,8 @@ import axios from "axios";
 
 export default function PoliceStationRegistrationForm() {
   const [formData, setFormData] = useState({
+    username: "",
+    password: "",
     stationName: "",
     type: "",
     registrationNumber: "",
@@ -27,9 +29,7 @@ export default function PoliceStationRegistrationForm() {
     documents: {
       registrationCertUrl: "",
       officerIdUrl: ""
-    },
-    username: "",
-    password: ""
+    }
   });
 
   const [detectingAddress, setDetectingAddress] = useState(false);
@@ -69,6 +69,8 @@ export default function PoliceStationRegistrationForm() {
       const res = await axios.post("http://localhost:3000/api/police/register", formData);
       alert("Registration successful!");
       setFormData({
+        username: "",
+        password: "",
         stationName: "",
         type: "",
         registrationNumber: "",
@@ -93,9 +95,7 @@ export default function PoliceStationRegistrationForm() {
         documents: {
           registrationCertUrl: "",
           officerIdUrl: ""
-        },
-        username: "",
-        password: ""
+        }
       });
     } catch (err) {
       alert(err?.response?.data?.message || "Registration failed.");
@@ -142,7 +142,15 @@ export default function PoliceStationRegistrationForm() {
       <h2 className="text-2xl font-bold mb-6">Police Station Registration Form</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         <div>
-          <label>Police Station Name</label>
+          <label>Username</label>
+          <input type="text" name="username" value={formData.username} onChange={handleChange} required className="w-full p-2 border rounded" />
+        </div>
+        <div>
+          <label>Password</label>
+          <input type="password" name="password" value={formData.password} onChange={handleChange} required className="w-full p-2 border rounded" />
+        </div>
+        <div>
+          <label>Station Name</label>
           <input type="text" name="stationName" value={formData.stationName} onChange={handleChange} required className="w-full p-2 border rounded" />
         </div>
         <div>
@@ -162,7 +170,7 @@ export default function PoliceStationRegistrationForm() {
           <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full p-2 border rounded" />
         </div>
         <div>
-          <label>Phone Number</label>
+          <label>Phone</label>
           <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required className="w-full p-2 border rounded" />
         </div>
         <div>
@@ -207,14 +215,6 @@ export default function PoliceStationRegistrationForm() {
             <input type="text" name="documents.officerIdUrl" value={formData.documents.officerIdUrl} onChange={handleChange} required placeholder="Officer ID URL" className="p-2 border rounded" />
           </div>
         </fieldset>
-        <div>
-          <label>Username</label>
-          <input type="text" name="username" value={formData.username} onChange={handleChange} required className="w-full p-2 border rounded" />
-        </div>
-        <div>
-          <label>Password</label>
-          <input type="password" name="password" value={formData.password} onChange={handleChange} required className="w-full p-2 border rounded" />
-        </div>
         <button type="submit" className="mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Submit</button>
       </form>
     </div>

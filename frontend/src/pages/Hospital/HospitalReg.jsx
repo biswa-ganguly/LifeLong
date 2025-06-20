@@ -11,6 +11,8 @@ const DEPARTMENTS_OPTIONS = [
 
 export default function HospitalRegistrationForm() {
   const [formData, setFormData] = useState({
+    username: "",
+    password: "",
     name: "",
     type: "",
     registrationNumber: "",
@@ -177,6 +179,8 @@ export default function HospitalRegistrationForm() {
       const res = await axios.post("http://localhost:3000/api/hospital/register", formData);
       alert("Registration successful!");
       setFormData({
+        username: "",
+        password: "",
         name: "",
         type: "",
         registrationNumber: "",
@@ -216,6 +220,14 @@ export default function HospitalRegistrationForm() {
     <div className="max-w-3xl mx-auto p-6 shadow-xl">
       <h2 className="text-2xl font-bold mb-6">Hospital Registration Form</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+        <div>
+          <label>Username</label>
+          <input type="text" name="username" value={formData.username} onChange={handleChange} required className="w-full p-2 border rounded" />
+        </div>
+        <div>
+          <label>Password</label>
+          <input type="password" name="password" value={formData.password} onChange={handleChange} required className="w-full p-2 border rounded" />
+        </div>
         <div>
           <label>Hospital Name</label>
           <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full p-2 border rounded" />
