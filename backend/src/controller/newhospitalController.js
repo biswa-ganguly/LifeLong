@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 // Register Hospital
 export const createHospital = async (req, res) => {
   try {
+    console.log('Received hospital registration:', JSON.stringify(req.body, null, 2));
     const {
       name,
       type,
@@ -66,6 +67,11 @@ export const createHospital = async (req, res) => {
     });
     res.status(201).json({ message: 'Hospital registered successfully!', hospital });
   } catch (error) {
+    console.error('Hospital registration error:', error);
+    // If it's a Mongoose validation error, return the message
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: 'Server Error!', error: error.toString() });
   }
 };
