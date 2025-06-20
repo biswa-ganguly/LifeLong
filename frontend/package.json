@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@clerk/clerk-react": "^5.32.0",
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-label": "^2.1.7",
@@ -23,21 +22,10 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
-=======
-    "@tailwindcss/vite": "^4.1.10",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+
     "tailwindcss": "^4.1.10",
-    "@clerk/clerk-react": "^5.32.0",
-    "@heroicons/react": "^2.2.0",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-slot": "^1.2.3",
-    "axios": "^1.6.7",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.515.0",
-    "react-router-dom": "^6.22.3",
->>>>>>> dfc13b7b59b82e6cae8d7d607ee736361cfb843b
+
+    
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

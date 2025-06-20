@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-<<<<<<< HEAD
   plugins: [react(),tailwindcss()],
   server: {
     port: 5173,
@@ -16,7 +15,3 @@ export default defineConfig({
     },
   },
 }) 
-=======
-  plugins: [react(),tailwindcss(),],
-})
->>>>>>> dfc13b7b59b82e6cae8d7d607ee736361cfb843b

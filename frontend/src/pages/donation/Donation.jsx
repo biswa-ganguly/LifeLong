@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 
@@ -362,14 +361,3 @@ function Donation() {
 }
 
 export default Donation;
-=======
-import React from 'react'
-
-function Donation() {
-  return (
-    <div>Donation</div>
-  )
-}
-
-export default Donation
->>>>>>> dfc13b7b59b82e6cae8d7d607ee736361cfb843b
