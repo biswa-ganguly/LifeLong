@@ -7,6 +7,8 @@ export const createHospital = async (req, res) => {
   try {
     console.log('Received hospital registration:', JSON.stringify(req.body, null, 2));
     const {
+      username,
+      password,
       name,
       type,
       registrationNumber,
@@ -23,7 +25,7 @@ export const createHospital = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!name || !type || !registrationNumber || !email || !phone || !address || !admin) {
+    if (!username || !password || !name || !type || !registrationNumber || !email || !phone || !address || !admin) {
       return res.status(400).json({ message: 'Missing required fields!' });
     }
     // Validate nested address
@@ -40,7 +42,11 @@ export const createHospital = async (req, res) => {
         return res.status(400).json({ message: `Admin field '${field}' is required!` });
       }
     }
-    // Check for unique registrationNumber and email
+    // Check for unique username, registrationNumber and email
+    const existingUsername = await NewHospitals.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: 'Username already taken!' });
+    }
     const existingRegNum = await NewHospitals.findOne({ registrationNumber });
     if (existingRegNum) {
       return res.status(400).json({ message: 'Registration number already registered!' });
@@ -49,8 +55,12 @@ export const createHospital = async (req, res) => {
     if (existingEmail) {
       return res.status(400).json({ message: 'Email already registered!' });
     }
+    // Hash password
+    const hashed = await bcrypt.hash(password, 10);
     // Create hospital
     const hospital = await NewHospitals.create({
+      username,
+      password: hashed,
       name,
       type,
       registrationNumber,
@@ -79,18 +89,20 @@ export const createHospital = async (req, res) => {
 //Login Hospital
 export const hospitalLogin = async (req, res) => {
   try {
-    const { registrationNumber } = req.body;
-    // For demo, login by registrationNumber (or you can use email/other field)
-    if (!registrationNumber) {
-      return res.status(400).json({ message: "Registration number is required!" });
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required!" });
     }
-    const hospital = await NewHospitals.findOne({ registrationNumber });
+    const hospital = await NewHospitals.findOne({ username });
     if (!hospital) {
       return res.status(400).json({ message: "Invalid credentials!" });
     }
-    // You can add password check if you add password field
+    const match = await bcrypt.compare(password, hospital.password);
+    if (!match) {
+      return res.status(400).json({ message: "Invalid credentials!" });
+    }
     const token = jwt.sign({ id: hospital._id, role:'hospital' }, process.env.HOSPITAL_SECRET_KEY, { expiresIn:'1h' });
-    res.json({ message: "Login successful!", token });
+    res.json({ message: "Login successful!", token, hospitalId: hospital._id });
   } catch (error) {
     res.status(500).json({ message: "Server Error!", error: error.toString() });
   }

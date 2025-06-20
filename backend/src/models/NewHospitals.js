@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
 const hospitalSchema = new mongoose.Schema({ 
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
   name: { type: String, required: true },
   type: { type: String, required: true },
   registrationNumber: { type: String, required: true, unique: true },
