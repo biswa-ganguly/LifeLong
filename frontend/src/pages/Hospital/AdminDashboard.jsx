@@ -1,12 +1,15 @@
+// HospitalAdminDashboard.jsx
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 function HospitalAdminDashboard() {
+  const { hospitalId } = useParams(); // 👈 Get hospitalId from the URL
   const [donations, setDonations] = useState([]);
   const [message, setMessage] = useState('');
 
   const fetchDonations = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/donations');
+      const res = await fetch(`http://localhost:3000/api/donations/${hospitalId}`);
       const data = await res.json();
       setDonations(data);
     } catch (err) {
@@ -16,15 +19,13 @@ function HospitalAdminDashboard() {
 
   useEffect(() => {
     fetchDonations();
-  }, []);
+  }, [hospitalId]);
 
   const updateStatus = async (id, status) => {
     try {
       const res = await fetch(`http://localhost:3000/api/donations/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
 
