@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { SignUpButton } from '@clerk/clerk-react';
-import heroImage from '../assets/hero.svg';
+import heroImage from '../../assets/hero.svg';
 
 function Hero() {
   return (
