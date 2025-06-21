@@ -11,12 +11,10 @@ const useIPTracker = () => {
 
   const getIPAddress = async () => {
     try {
-      // Using ipapi.co as it's free and reliable
       const response = await fetch('https://ipapi.co/json/');
       const data = await response.json();
       return data;
     } catch (err) {
-      // Fallback to ipify if first service fails
       try {
         const fallbackResponse = await fetch('https://api.ipify.org?format=json');
         const fallbackData = await fallbackResponse.json();
@@ -49,7 +47,7 @@ const useIPTracker = () => {
 
 function Emergency() {
   const [formData, setFormData] = useState({
-    incidentType: 'Accident',
+    incidentType: '',
     name: '',
     gender: '',
     approximateAge: '',
@@ -77,8 +75,6 @@ function Emergency() {
   const [loadingStations, setLoadingStations] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-
-  // Voice recognition states
   const [isListening, setIsListening] = useState({});
   const [recognition, setRecognition] = useState(null);
   const [isVoiceSupported, setIsVoiceSupported] = useState(false);
@@ -104,7 +100,6 @@ function Emergency() {
     }
   }, []);
 
-  // Voice recognition function
   const startVoiceRecognition = (fieldName) => {
     if (!recognition || !isVoiceSupported) {
       alert('Voice recognition is not supported in your browser');
@@ -131,20 +126,10 @@ function Emergency() {
 
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
-      alert('Voice recognition failed. Please try again.');
       setIsListening(prev => ({ ...prev, [fieldName]: false }));
     };
 
-    recognition.onend = () => {
-      setIsListening(prev => ({ ...prev, [fieldName]: false }));
-    };
-
-    try {
-      recognition.start();
-    } catch (error) {
-      console.error('Failed to start recognition:', error);
-      setIsListening(prev => ({ ...prev, [fieldName]: false }));
-    }
+    recognition.start();
   };
 
   const stopVoiceRecognition = (fieldName) => {
@@ -154,8 +139,7 @@ function Emergency() {
     setIsListening(prev => ({ ...prev, [fieldName]: false }));
   };
 
-  // Voice Input Component
-  const VoiceInputButton = ({ fieldName, isActive = false }) => {
+  const VoiceInputButton = ({ fieldName }) => {
     if (!isVoiceSupported) return null;
 
     const isCurrentlyListening = isListening[fieldName];
@@ -163,13 +147,7 @@ function Emergency() {
     return (
       <button
         type="button"
-        onClick={() => {
-          if (isCurrentlyListening) {
-            stopVoiceRecognition(fieldName);
-          } else {
-            startVoiceRecognition(fieldName);
-          }
-        }}
+        onClick={() => isCurrentlyListening ? stopVoiceRecognition(fieldName) : startVoiceRecognition(fieldName)}
         className={`flex items-center justify-center w-8 h-8 rounded border ${
           isCurrentlyListening 
             ? 'bg-red-500 text-white border-red-500' 
@@ -186,7 +164,6 @@ function Emergency() {
     );
   };
 
-  // Handle click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (stationSearchRef.current && !stationSearchRef.current.contains(event.target)) {
@@ -195,9 +172,7 @@ function Emergency() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const searchPoliceStations = debounce(async (query) => {
@@ -281,7 +256,7 @@ function Emergency() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
@@ -343,49 +318,10 @@ function Emergency() {
     return Object.keys(errors).length === 0;
   };
 
-  // Send IP data to backend
-  const sendIPToBackend = async (ipInfo, firData) => {
-    try {
-      const ipPayload = {
-        ip: ipInfo.ip,
-        city: ipInfo.city || 'Unknown',
-        region: ipInfo.region || 'Unknown',
-        country: ipInfo.country_name || 'Unknown',
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        screenResolution: `${window.screen.width}x${window.screen.height}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        // FIR related data
-        firSubmissionId: firData.submissionId || null,
-        incidentType: firData.incidentType,
-        policeStationId: firData.policeStation.id,
-        reporterUserId: firData.reporter.userId,
-        isAnonymousReport: firData.reporter.isAnonymous
-      };
-
-      const response = await fetch('http://localhost:3000/api/track-device', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(ipPayload)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save IP tracking data');
-      }
-
-      return await response.json();
-    } catch (err) {
-      console.error('Error sending IP data to backend:', err);
-      // Don't throw error here as IP tracking shouldn't block FIR submission
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
 
     setUploading(true);
 
@@ -397,58 +333,45 @@ function Emergency() {
 
       const payload = {
         incidentType: formData.incidentType,
-        deceasedDetails: {
-          name: formData.name || 'Unknown',
-          gender: formData.gender,
-          approximateAge: parseInt(formData.approximateAge)
-        },
-        incidentLocation: {
-          address: formData.address,
-          latitude: formData.latitude,
-          longitude: formData.longitude
-        },
+        name: formData.name || 'Unknown',
+        gender: formData.gender,
+        approximateAge: parseInt(formData.approximateAge) || null,
+        address: formData.address,
+        latitude: parseFloat(formData.latitude) || null,
+        longitude: parseFloat(formData.longitude) || null,
         initialObservations: formData.initialObservations,
-        photoUrl: uploadedImageUrl,
-        reporter: {
-          isAnonymous: formData.isAnonymous,
-          name: formData.isAnonymous ? 'Anonymous' : formData.reporterName,
-          relation: formData.isAnonymous ? 'Witness' : formData.reporterRelation,
-          userId: user ? user.id : 'anonymous_user'
+        photoUrl: uploadedImageUrl || null,
+        isAnonymous: formData.isAnonymous,
+        reporterName: formData.isAnonymous ? 'Anonymous' : formData.reporterName,
+        reporterRelation: formData.isAnonymous ? 'Witness' : formData.reporterRelation,
+        policeStationId: formData.policeStationId,
+        policeStationName: formData.policeStationName,
+        ipAddress: ipData?.ip || null,
+        userId: user?.id || 'anonymous'
+      };
+
+      console.log('Submitting payload:', JSON.stringify(payload, null, 2));
+
+      const response = await fetch('http://localhost:3000/api/emergency-fir', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user?.id}`
         },
-        policeStation: {
-          id: formData.policeStationId,
-          name: formData.policeStationName
-        }
-      };
+        body: JSON.stringify(payload)
+      });
 
-      // Submit FIR first
-      console.log('FIR Payload:', payload);
-      
-      // Simulate successful FIR submission with ID
-      const mockFirResponse = {
-        success: true,
-        submissionId: 'FIR' + Date.now(),
-        message: 'FIR submitted successfully'
-      };
+      const result = await response.json();
 
-      // Send IP tracking data to backend (non-blocking)
-      if (ipData && !ipError) {
-        try {
-          await sendIPToBackend(ipData, {
-            ...payload,
-            submissionId: mockFirResponse.submissionId
-          });
-          console.log('IP tracking data sent successfully',ipData);
-        } catch (ipErr) {
-          console.warn('IP tracking failed but FIR was submitted successfully');
-        }
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit FIR');
       }
 
-      alert('FIR submitted successfully!');
-
+      alert(`FIR submitted successfully! ID: ${result.firId}`);
+      
       // Reset form
       setFormData({
-        incidentType: 'Accident',
+        incidentType: '',
         name: '',
         gender: '',
         approximateAge: '',
@@ -466,8 +389,10 @@ function Emergency() {
       setLocalPreview(null);
       setImageFile(null);
       setSearchQuery('');
-    } catch (err) {
-      alert(err.message || 'Error submitting FIR');
+      
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert(error.message || 'Error submitting FIR. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -482,7 +407,7 @@ function Emergency() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6">
       <div className="mb-6">
         <h2 className="text-xl font-bold mb-2">Emergency FIR Submission</h2>
         {isVoiceSupported && (
@@ -492,7 +417,6 @@ function Emergency() {
           </div>
         )}
         
-        {/* IP Status Indicator */}
         {ipLoading && (
           <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded mt-2">
             <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -514,7 +438,6 @@ function Emergency() {
       </div>
 
       <div className="space-y-4">
-
         <div>
           <label className="block mb-1 font-medium">Incident Type: *</label>
           <div className="flex gap-2">
@@ -573,7 +496,6 @@ function Emergency() {
           />
         </div>
 
-        {/* Police Station Search */}
         <div className="relative" ref={stationSearchRef}>
           <label className="block mb-1 font-medium">Police Station: *</label>
           <div className="flex gap-2">
@@ -679,7 +601,7 @@ function Emergency() {
               onChange={handleChange} 
               className="flex-1 border p-2 rounded" 
               rows="4"
-              placeholder="Describe what you observed at the scene..."
+              placeholder="Describe what you observed at the scene...(Minimum 25 characters)"
               required 
             />
             <div className="flex flex-col">
@@ -694,7 +616,6 @@ function Emergency() {
           )}
         </div>
 
-        {/* Upload or Webcam */}
         <div>
           <label className="block mb-1 font-medium">Photo of Incident:</label>
           <div className="flex gap-3 flex-wrap items-center">
@@ -768,7 +689,6 @@ function Emergency() {
           )}
         </div>
 
-        {/* Reporter Details */}
         <fieldset className="border border-gray-300 p-4 rounded-md">
           <legend className="text-lg font-semibold text-gray-800 px-2">Reporter Details</legend>
           <div className="mt-4 space-y-4">
@@ -835,8 +755,7 @@ function Emergency() {
         </fieldset>
 
         <button 
-          type="button" 
-          onClick={handleSubmit}
+          type="submit" 
           disabled={uploading}
           className={`w-full bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 font-medium ${
             uploading ? "opacity-50 cursor-not-allowed" : ""
@@ -845,7 +764,7 @@ function Emergency() {
           {uploading ? 'Submitting Emergency FIR...' : 'Submit Emergency FIR'}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
 

@@ -17,14 +17,22 @@ import policeSearchRouter from "./src/routes/policeSearch.js";
 import emergencyFIRRoutes from './src/routes/emergencyFIRRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
 import geminiRoute from './src/routes/gemini.js';
+import emergencyRoutes from "./src/routes/emergencyRoutes.js";
+import volunteerRoutes from "./src/routes/volunteerRoutes.js";
+
 
 dotenv.config();
 
 // ES Modules path configuration
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const _dirname = path.dirname(fileURLToPath(import.meta.url));
+
 
 const app = express();
+
+// Serve static files (including fcm-token.html)
+app.use(express.static(_dirname));
 
 // Middleware
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
@@ -48,6 +56,8 @@ app.use("/api", hospitalSearchRoute);
 app.use("/api", policeSearchRouter);
 app.use('/api', uploadRoutes);
 app.use('/api/gemini', geminiRoute);
+app.use("/api/emergency", emergencyRoutes);
+app.use("/api/volunteers", volunteerRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
