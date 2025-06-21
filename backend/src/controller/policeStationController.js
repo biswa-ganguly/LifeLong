@@ -7,7 +7,6 @@ export const createPoliceStation = async (req, res) => {
   try {
     const {
       stationName,
-      type,
       registrationNumber,
       zone,
       email,
@@ -22,7 +21,7 @@ export const createPoliceStation = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!stationName || !type || !registrationNumber || !zone || !email || !phone || !emergencyContact || !address || !admin || !jurisdiction || !documents || !username || !password) {
+    if (!stationName || !registrationNumber || !zone || !email || !phone || !emergencyContact || !address || !admin || !jurisdiction || !documents || !username || !password) {
       return res.status(400).json({ message: 'All fields are required!' });
     }
     // Validate nested address
@@ -65,7 +64,6 @@ export const createPoliceStation = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const policeStation = await PoliceStation.create({
       stationName,
-      type,
       registrationNumber,
       zone,
       email,
