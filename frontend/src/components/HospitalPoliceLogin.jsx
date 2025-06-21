@@ -32,7 +32,7 @@ export default function HospitalPoliceLogin({ role: propRole }) {
           password: form.password,
         });
         localStorage.setItem("police_token", res.data.token);
-        navigate("/police/admin");
+        navigate(`/police/admin/${res.data?.policeinfo?._id}`);
       } else {
         setError("Please select a role.");
         setLoading(false);

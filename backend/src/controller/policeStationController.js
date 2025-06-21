@@ -93,7 +93,7 @@ export const policeLogin = async (req, res) => {
   
     const police = await PoliceStation.findOne({ username });
     if (!police) {
-      return res.status(400).json({ message: "Invalid credentials!" });
+      return res.status(400).json({ message: "No Police Station Found!" });
     }
   
     const match = await bcrypt.compare(password, police.password);
@@ -103,7 +103,7 @@ export const policeLogin = async (req, res) => {
   
     const token = jwt.sign({ id: police._id, role:'police' }, process.env.POLICE_SECRET_KEY, { expiresIn:'1h' });
 
-    res.json({ message: "Login successful!", token });
+    res.json({ message: "Login successful!", token , policeinfo:police });
   } catch (error) {
     res.status(500).json({ message: "Server Error!", error: error.toString() });
   } 
