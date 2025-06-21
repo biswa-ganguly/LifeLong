@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import { Search } from 'lucide-react';
 
 function Donation() {
   const { user, isSignedIn } = useUser();
@@ -15,44 +16,58 @@ function Donation() {
   const [hospitalId, setHospitalId] = useState('');
   const [hospitalName, setHospitalName] = useState('');
   const [hospitals, setHospitals] = useState([]);
-  const [hasSelectedHospital, setHasSelectedHospital] = useState(false);
+  const [showHospitalSuggestions, setShowHospitalSuggestions] = useState(false);
+  const [loadingHospitals, setLoadingHospitals] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
+  const hospitalSearchRef = useRef(null);
+
+  // Handle click outside to close suggestions
   useEffect(() => {
-    const delay = setTimeout(() => {
-      if (hospitalName.trim() === '') {
-        fetchAllHospitals();
-      } else if (!hasSelectedHospital) {
-        fetchHospitalsByName(hospitalName);
+    const handleClickOutside = (event) => {
+      if (hospitalSearchRef.current && !hospitalSearchRef.current.contains(event.target)) {
+        setShowHospitalSuggestions(false);
       }
-    }, 300);
+    };
 
-    return () => clearTimeout(delay);
-  }, [hospitalName, hasSelectedHospital]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
-  const fetchAllHospitals = async () => {
-    try {
-      const res = await fetch(`http://localhost:3000/api/hospital/all`);
-      const data = await res.json();
-      setHospitals(data);
-    } catch (err) {
-      console.error('Error fetching all hospitals:', err);
+  // Search hospitals by name
+  const searchHospitals = debounce(async (query) => {
+    if (!query || query.length < 2) {
       setHospitals([]);
+      return;
     }
+
+    try {
+      setLoadingHospitals(true);
+      const response = await fetch(`http://localhost:3000/api/hospital/search?name=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      setHospitals(data);
+    } catch (error) {
+      console.error("Error searching hospitals:", error);
+      setHospitals([]);
+    } finally {
+      setLoadingHospitals(false);
+    }
+  }, 300);
+
+  const handleHospitalSearchChange = (e) => {
+    const query = e.target.value;
+    setHospitalName(query);
+    setHospitalId('');
+    searchHospitals(query);
   };
 
-  const fetchHospitalsByName = async (query) => {
-    try {
-      const res = await fetch(
-        `http://localhost:3000/api/hospital/search?name=${encodeURIComponent(query)}`
-      );
-      const data = await res.json();
-      setHospitals(data);
-    } catch (err) {
-      console.error('Error searching hospitals:', err);
-      setHospitals([]);
-    }
+  const selectHospital = (hospital) => {
+    setHospitalId(hospital._id);
+    setHospitalName(hospital.name);
+    setShowHospitalSuggestions(false);
   };
 
   const handleSubmit = async (e) => {
@@ -116,7 +131,6 @@ function Donation() {
       setRelationToRecipient('');
       setHospitalId('');
       setHospitalName('');
-      setHasSelectedHospital(false);
       setHospitals([]);
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -124,6 +138,14 @@ function Donation() {
       setLoading(false);
     }
   };
+
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
 
   return (
     <div className="max-w-xl mx-auto mt-12 px-6 py-8 bg-white shadow-xl rounded-xl border">
@@ -145,47 +167,45 @@ function Donation() {
         </div>
 
         {/* Hospital Search */}
-        <div className="relative">
+        <div className="relative" ref={hospitalSearchRef}>
           <label className="block mb-1 font-medium text-gray-700">Search & Select Hospital *</label>
-          <input
-            type="text"
-            placeholder="Search hospital by name..."
-            value={hospitalName}
-            onChange={(e) => {
-              setHospitalName(e.target.value);
-              setHospitalId('');
-              setHasSelectedHospital(false);
-            }}
-            className="w-full border border-gray-300 rounded-md p-2"
-            required
-          />
-
-          {/* Dropdown */}
-          {hospitalName !== '' && hospitals.length > 0 && !hasSelectedHospital && (
-            <div className="absolute w-full border border-gray-300 rounded-md bg-white shadow z-10 max-h-60 overflow-y-auto">
-              {hospitals.map((hospital) => (
-                <div
-                  key={hospital._id}
-                  onClick={() => {
-                    setHospitalId(hospital.id);
-                    setHospitalName(hospital.name);
-                    setHasSelectedHospital(true);
-                    setHospitals([]);
-                  }}
-                  className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
-                >
-                  🏥 {hospital.name} - {hospital.location || hospital.address}
+          <div className="flex items-center border rounded">
+            <input
+              type="text"
+              placeholder="Search hospital by name..."
+              value={hospitalName}
+              onChange={handleHospitalSearchChange}
+              onFocus={() => setShowHospitalSuggestions(true)}
+              className="flex-1 p-2 outline-none"
+              required
+            />
+            <Search className="w-5 h-5 mx-2 text-gray-400" />
+          </div>
+          
+          {showHospitalSuggestions && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-auto">
+              {loadingHospitals ? (
+                <div className="p-2 text-gray-500">Loading hospitals...</div>
+              ) : hospitals.length > 0 ? (
+                hospitals.map((hospital) => (
+                  <div
+                    key={hospital._id}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => selectHospital(hospital)}
+                  >
+                    <div className="font-medium">🏥 {hospital.name}</div>
+                    <div className="text-sm text-gray-600">{hospital.location || hospital.address}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-2 text-gray-500">
+                  {hospitalName.length > 1 ? "No hospitals found" : "Type at least 2 characters"}
                 </div>
-              ))}
-            </div>
-          )}
-          {hospitalName && hospitals.length === 0 && !hasSelectedHospital && (
-            <div className="absolute w-full border border-gray-300 rounded-md bg-white shadow z-10">
-              <div className="px-3 py-2 text-gray-500">❌ No Hospitals Found</div>
+              )}
             </div>
           )}
 
-          {hasSelectedHospital && hospitalName && (
+          {hospitalId && (
             <p className="text-green-700 text-sm mt-1">✅ Selected: {hospitalName}</p>
           )}
         </div>
