@@ -108,7 +108,7 @@ function HowItWorks() {
         </div>
 
         {/* Statistics Section */}
-        <div className="bg-gradient-to-r from-[#0052CC] to-[#0047B3] rounded-3xl p-12 text-white mb-10">
+        <div className="bg-gradient-to-r from-[#0052CC] to-[#0047B3] rounded-3xl p-12 text-white mb-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
             {[
               { stat: '500+', label: 'Verified Hospitals' },
