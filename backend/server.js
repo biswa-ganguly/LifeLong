@@ -12,6 +12,8 @@ import policestationRoute from "./src/routes/policeStationRoute.js";
 import donationRoutes from "./src/routes/donationRoutes.js";
 import { loadHospitalsAtStartup } from "./src/services/loadHospitals.js";
 import hospitalSearchRoute from "./src/routes/hospitalSearchRoute.js";
+import emergencyFIRRoutes from './src/routes/emergencyFIRRoutes.js';
+import uploadRoutes from './src/routes/uploadRoutes.js';
 
 dotenv.config();
 
@@ -33,11 +35,13 @@ app.set("views", path.join(__dirname, "src", "views"));
 
 // Routes
 app.use("/", smsRoutes);
+app.use('/api', emergencyFIRRoutes);
 app.use("/api/hospital", newhospitalRoute);
 app.use("/api/police", policestationRoute);
 app.use("/api/donations", donationRoutes);
 app.use("/api", hospitalFetchRoute);
 app.use("/api", hospitalSearchRoute);
+app.use('/api', uploadRoutes);
 
 // Health check
 app.get("/health", (req, res) => {

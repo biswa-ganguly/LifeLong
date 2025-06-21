@@ -1,19 +1,32 @@
-// HospitalAdminDashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 function HospitalAdminDashboard() {
-  const { hospitalId } = useParams(); // 👈 Get hospitalId from the URL
+  const { hospitalId } = useParams();
   const [donations, setDonations] = useState([]);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const fetchDonations = async () => {
     try {
       const res = await fetch(`http://localhost:3000/api/donations/${hospitalId}`);
       const data = await res.json();
-      setDonations(data);
+
+      console.log("Fetched donations:", data); // Debug
+
+      if (Array.isArray(data)) {
+        setDonations(data);
+        setMessage('');
+      } else if (data.message) {
+        setDonations([]);
+        setMessage(data.message); // Use backend's message
+      }
     } catch (err) {
+      console.error(err);
       setMessage('Failed to fetch donation requests');
+      setDonations([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,6 +47,7 @@ function HospitalAdminDashboard() {
         prev.map((donation) => (donation._id === updated._id ? updated : donation))
       );
     } catch (err) {
+      console.error(err);
       setMessage('Failed to update status');
     }
   };
@@ -41,9 +55,11 @@ function HospitalAdminDashboard() {
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6">
       <h2 className="text-2xl font-bold mb-4">Admin Donation Dashboard</h2>
-      {message && <p className="text-red-500">{message}</p>}
-      {donations.length === 0 ? (
-        <p>No donation requests found.</p>
+
+      {loading ? (
+        <p className="text-center">Loading...</p>
+      ) : message ? (
+        <p className="text-gray-600 text-center text-lg font-medium">{message}</p>
       ) : (
         <div className="space-y-4">
           {donations.map((donation) => (
@@ -54,9 +70,23 @@ function HospitalAdminDashboard() {
               <div className="space-y-1">
                 <p><strong>Type:</strong> {donation.type}</p>
                 <p><strong>Details:</strong> {donation.details}</p>
-                <p><strong>Status:</strong> <span className={`font-semibold ${donation.status === 'pending' ? 'text-yellow-600' : donation.status === 'accepted' ? 'text-green-600' : 'text-red-600'}`}>{donation.status}</span></p>
+                <p>
+                  <strong>Status:</strong>{' '}
+                  <span
+                    className={`font-semibold ${
+                      donation.status === 'pending'
+                        ? 'text-yellow-600'
+                        : donation.status === 'accepted'
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}
+                  >
+                    {donation.status}
+                  </span>
+                </p>
                 <p><strong>User ID:</strong> {donation.userId}</p>
               </div>
+
               {donation.status === 'pending' && (
                 <div className="flex gap-2 mt-4 sm:mt-0">
                   <button
