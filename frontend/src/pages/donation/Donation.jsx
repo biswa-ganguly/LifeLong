@@ -65,7 +65,7 @@ function Donation() {
   };
 
   const selectHospital = (hospital) => {
-    setHospitalId(hospital._id);
+    setHospitalId(hospital.id);
     setHospitalName(hospital.name);
     setShowHospitalSuggestions(false);
   };

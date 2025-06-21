@@ -48,7 +48,7 @@ function UserDashboard() {
         if (emergenciesRes.ok && Array.isArray(emergenciesData)) {
           setEmergencies(emergenciesData);
         } else {
-          setEmergencyError(emergenciesData?.error || 'Unexpected server response');
+          setEmergencyError(emergenciesData?.message || emergenciesData?.error || 'Unexpected server response');
         }
       } catch (err) {
         setError('Failed to fetch donation status');
