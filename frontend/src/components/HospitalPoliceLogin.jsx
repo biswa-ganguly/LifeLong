@@ -20,14 +20,14 @@ export default function HospitalPoliceLogin({ role: propRole }) {
     try {
       let res;
       if (role === "hospital") {
-        res = await axios.post("http://localhost:3000/api/hospital/login", {
+        res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/hospital/login`, {
           username: form.username,
           password: form.password,
         });
         localStorage.setItem("hospital_token", res.data.token);
         navigate(`/hospital/admin/${res.data?.hospitalId || ''}`);
       } else if (role === "police") {
-        res = await axios.post("http://localhost:3000/api/police/login", {
+        res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/police/login`, {
           username: form.username,
           password: form.password,
         });

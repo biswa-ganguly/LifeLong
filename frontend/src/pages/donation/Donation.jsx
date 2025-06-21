@@ -46,7 +46,7 @@ function Donation() {
 
     try {
       setLoadingHospitals(true);
-      const response = await fetch(`http://localhost:3000/api/hospital/search?name=${encodeURIComponent(query)}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/hospital/search?name=${encodeURIComponent(query)}`);
       const data = await response.json();
       setHospitals(data);
     } catch (error) {
@@ -110,7 +110,7 @@ function Donation() {
     }
 
     try {
-      const res = await fetch('http://localhost:3000/api/donations', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/donations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

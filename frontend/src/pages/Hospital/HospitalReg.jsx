@@ -344,8 +344,10 @@ export default function HospitalRegistrationForm() {
     setIsSubmitting(true);
     
     try {
-      const res = await axios.post("http://localhost:3000/api/hospital/register", formData);
-      alert("Registration successful!");
+      setLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/hospital/register`, formData);
+      setLoading(false);
+      setSuccess("Registration successful! Redirecting to login...");
       
       // Reset form
       setFormData({

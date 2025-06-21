@@ -19,10 +19,11 @@ const PanicButton = () => {
       const { latitude, longitude } = position.coords;
 
       // Send emergency alert to backend
-      const response = await axios.post("http://localhost:3000/api/emergency/panic-tap", {
-        userId: "user123", // Replace with actual user ID
-        latitude,
-        longitude,
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/emergency/panic-tap`, {
+        location: {
+          latitude,
+          longitude,
+        },
       });
 
       setSuccess(true);

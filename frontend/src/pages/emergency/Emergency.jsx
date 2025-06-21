@@ -183,7 +183,7 @@ function Emergency() {
 
     try {
       setLoadingStations(true);
-      const response = await fetch(`http://localhost:3000/api/police/search?name=${encodeURIComponent(query)}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/police/search?name=${encodeURIComponent(query)}`);
       const data = await response.json();
       
       const transformedStations = data.map(station => ({
@@ -352,7 +352,7 @@ function Emergency() {
 
       console.log('Submitting payload:', JSON.stringify(payload, null, 2));
 
-      const response = await fetch('http://localhost:3000/api/emergency-fir', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/emergency-fir`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

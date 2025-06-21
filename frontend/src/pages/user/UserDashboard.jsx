@@ -23,43 +23,43 @@ function UserDashboard() {
   const idToUse = userId || user?.id;
 
   useEffect(() => {
-    const fetchUserDonations = async () => {
+    const fetchUserData = async () => {
       try {
         const token = await getToken();
-        const res = await fetch(`http://localhost:3000/api/donations/mine?userId=${user.id}`);
-        const data = await res.json();
 
-        if (res.ok && Array.isArray(data)) {
-          setDonations(data);
+        // Fetch donations
+        const donationsRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/donations/mine?userId=${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const donationsData = await donationsRes.json();
+
+        if (donationsRes.ok && Array.isArray(donationsData)) {
+          setDonations(donationsData);
         } else {
-          setError(data?.error || 'Unexpected server response');
+          setError(donationsData?.error || 'Unexpected server response');
+        }
+
+        // Fetch emergencies
+        const emergenciesRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/emergency-firs/mine?userId=${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const emergenciesData = await emergenciesRes.json();
+
+        if (emergenciesRes.ok && Array.isArray(emergenciesData)) {
+          setEmergencies(emergenciesData);
+        } else {
+          setEmergencyError(emergenciesData?.error || 'Unexpected server response');
         }
       } catch (err) {
         setError('Failed to fetch donation status');
+        setEmergencyError('Failed to fetch emergency requests');
       } finally {
         setLoading(false);
       }
     };
 
-    const fetchUserEmergencies = async () => {
-      try {
-        const token = await getToken();
-        const res = await fetch(`http://localhost:3000/api/emergency/mine/${user.id}`);
-        const data = await res.json();
-
-        if (res.ok && Array.isArray(data)) {
-          setEmergencies(data);
-        } else {
-          setEmergencyError(data?.error || 'Unexpected server response');
-        }
-      } catch (err) {
-        setEmergencyError('Failed to fetch emergency requests');
-      }
-    };
-
     if (isLoaded && isSignedIn) {
-      fetchUserDonations();
-      fetchUserEmergencies();
+      fetchUserData();
     }
   }, [isLoaded, isSignedIn, getToken]);
 

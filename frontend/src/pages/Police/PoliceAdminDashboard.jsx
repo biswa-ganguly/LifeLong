@@ -9,7 +9,8 @@ function PoliceAdminDashboard() {
 
   const fetchEmergencyFIRs = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/emergency-firs/${policeId}`);
+      setLoading(true);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/emergency-firs/${policeId}`);
       const data = await res.json();
 
       if (Array.isArray(data)) {
@@ -39,7 +40,8 @@ function PoliceAdminDashboard() {
     if (note === null) return; // User cancelled
 
     try {
-      const res = await fetch(`http://localhost:3000/api/emergency-firs/status/${id}`, {
+      setLoading(true);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/emergency-firs/status/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, note }),
@@ -60,6 +62,8 @@ function PoliceAdminDashboard() {
     } catch (err) {
       console.error(err);
       setMessage('Error while updating FIR status');
+    } finally {
+      setLoading(false);
     }
   };
 

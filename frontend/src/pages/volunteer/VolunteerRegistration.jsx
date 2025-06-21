@@ -72,7 +72,7 @@ const VolunteerRegistration = () => {
         isActive: true,
       };
       
-      const response = await axios.post('http://localhost:3000/api/volunteers', volunteerData);
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/volunteers`, volunteerData);
       
       if (response.data.success) {
         setSuccess('You have been registered as a volunteer!');

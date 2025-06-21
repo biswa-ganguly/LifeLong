@@ -13,6 +13,7 @@ const AIAgent = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -36,10 +37,10 @@ const AIAgent = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
+    setError('');
 
     try {
-      // Try backend API first
-      const backendResponse = await fetch('http://localhost:3000/api/gemini', {
+      const backendResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/gemini`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

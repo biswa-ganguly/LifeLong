@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import debounce from "lodash.debounce";
 import { Upload, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function PoliceStationRegistrationForm() {
   const [formData, setFormData] = useState({
@@ -42,10 +43,14 @@ export default function PoliceStationRegistrationForm() {
   const [registrationCertPreview, setRegistrationCertPreview] = useState(null);
   const [officerIdPreview, setOfficerIdPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   
   const addressInputRef = useRef(null);
   const registrationCertRef = useRef(null);
   const officerIdRef = useRef(null);
+  const navigate = useNavigate();
 
   // Kolkata Police Jurisdiction by Zone
   const jurisdictionOptions = {
@@ -300,8 +305,12 @@ export default function PoliceStationRegistrationForm() {
     setIsSubmitting(true);
     
     try {
-      const res = await axios.post("http://localhost:3000/api/police/register", formData);
-      alert("Registration successful!");
+      setLoading(true);
+      setError("");
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/police/register`, formData);
+      setLoading(false);
+      setSuccess("Registration successful! Redirecting to login...");
+      setTimeout(() => navigate("/hospital-police-login"), 2000); // Redirect after 2s
       
       // Reset form
       setFormData({
@@ -337,7 +346,7 @@ export default function PoliceStationRegistrationForm() {
       setOfficerIdPreview(null);
       
     } catch (err) {
-      alert(err?.response?.data?.message || "Registration failed.");
+      setError(err?.response?.data?.message || "Registration failed.");
     } finally {
       setIsSubmitting(false);
     }

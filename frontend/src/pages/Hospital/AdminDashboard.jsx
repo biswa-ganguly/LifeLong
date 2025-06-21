@@ -9,7 +9,8 @@ function HospitalAdminDashboard() {
 
   const fetchDonations = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/donations/${hospitalId}`);
+      setLoading(true);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/donations/${hospitalId}`);
       const data = await res.json();
 
       console.log("Fetched donations:", data); // Debug
@@ -36,7 +37,8 @@ function HospitalAdminDashboard() {
 
   const updateStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/donations/${id}/status`, {
+      setLoading(true);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/donations/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
