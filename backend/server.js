@@ -14,6 +14,7 @@ import { loadHospitalsAtStartup } from "./src/services/loadHospitals.js";
 import hospitalSearchRoute from "./src/routes/hospitalSearchRoute.js";
 import emergencyFIRRoutes from './src/routes/emergencyFIRRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
+import geminiRoute from './routes/gemini.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(morgan("dev"));
 
+
 // EJS Setup (if used)
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "src", "views"));
@@ -42,6 +44,7 @@ app.use("/api/donations", donationRoutes);
 app.use("/api", hospitalFetchRoute);
 app.use("/api", hospitalSearchRoute);
 app.use('/api', uploadRoutes);
+app.use('/api/gemini', geminiRoute);
 
 // Health check
 app.get("/health", (req, res) => {
