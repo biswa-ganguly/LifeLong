@@ -3,6 +3,50 @@ import { useUser } from "@clerk/clerk-react";
 import { Upload, Video, X, Search, MapPin, Mic, MicOff } from "lucide-react";
 import Webcam from "react-webcam";
 
+// IP Address Hook
+const useIPTracker = () => {
+  const [ipData, setIpData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const getIPAddress = async () => {
+    try {
+      // Using ipapi.co as it's free and reliable
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      // Fallback to ipify if first service fails
+      try {
+        const fallbackResponse = await fetch('https://api.ipify.org?format=json');
+        const fallbackData = await fallbackResponse.json();
+        return { ip: fallbackData.ip };
+      } catch (fallbackErr) {
+        throw new Error('Failed to fetch IP address');
+      }
+    }
+  };
+
+  useEffect(() => {
+    const trackIP = async () => {
+      try {
+        setLoading(true);
+        const ipInfo = await getIPAddress();
+        setIpData(ipInfo);
+      } catch (err) {
+        setError(err.message);
+        console.error('IP tracking error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    trackIP();
+  }, []);
+
+  return { ipData, loading, error };
+};
+
 function Emergency() {
   const [formData, setFormData] = useState({
     incidentType: 'Accident',
@@ -21,6 +65,7 @@ function Emergency() {
   });
 
   const { user } = useUser();
+  const { ipData, loading: ipLoading, error: ipError } = useIPTracker();
   const [uploading, setUploading] = useState(false);
   const [showWebcam, setShowWebcam] = useState(false);
   const [localPreview, setLocalPreview] = useState(null);
@@ -297,8 +342,46 @@ function Emergency() {
     return Object.keys(errors).length === 0;
   };
 
+  // Send IP data to backend
+  const sendIPToBackend = async (ipInfo, firData) => {
+    try {
+      const ipPayload = {
+        ip: ipInfo.ip,
+        city: ipInfo.city || 'Unknown',
+        region: ipInfo.region || 'Unknown',
+        country: ipInfo.country_name || 'Unknown',
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        screenResolution: `${window.screen.width}x${window.screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        // FIR related data
+        firSubmissionId: firData.submissionId || null,
+        incidentType: firData.incidentType,
+        policeStationId: firData.policeStation.id,
+        reporterUserId: firData.reporter.userId,
+        isAnonymousReport: firData.reporter.isAnonymous
+      };
+
+      const response = await fetch('http://localhost:3000/api/track-device', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ipPayload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save IP tracking data');
+      }
+
+      return await response.json();
+    } catch (err) {
+      console.error('Error sending IP data to backend:', err);
+      // Don't throw error here as IP tracking shouldn't block FIR submission
+    }
+  };
+
   const handleSubmit = async () => {
-    
     if (!validateForm()) {
       return;
     }
@@ -337,8 +420,29 @@ function Emergency() {
         }
       };
 
-      // Mock successful submission
-      console.log('Payload:', payload);
+      // Submit FIR first
+      console.log('FIR Payload:', payload);
+      
+      // Simulate successful FIR submission with ID
+      const mockFirResponse = {
+        success: true,
+        submissionId: 'FIR' + Date.now(),
+        message: 'FIR submitted successfully'
+      };
+
+      // Send IP tracking data to backend (non-blocking)
+      if (ipData && !ipError) {
+        try {
+          await sendIPToBackend(ipData, {
+            ...payload,
+            submissionId: mockFirResponse.submissionId
+          });
+          console.log('IP tracking data sent successfully',ipData);
+        } catch (ipErr) {
+          console.warn('IP tracking failed but FIR was submitted successfully');
+        }
+      }
+
       alert('FIR submitted successfully!');
 
       // Reset form
@@ -383,6 +487,26 @@ function Emergency() {
           <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded">
             <Mic className="w-4 h-4" />
             <span>Voice input is available for quick reporting</span>
+          </div>
+        )}
+        
+        {/* IP Status Indicator */}
+        {ipLoading && (
+          <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded mt-2">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span>Initializing security tracking...</span>
+          </div>
+        )}
+        
+        {ipError && (
+          <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 p-2 rounded mt-2">
+            <span>⚠️ Security tracking unavailable (form still functional)</span>
+          </div>
+        )}
+        
+        {ipData && !ipLoading && (
+          <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded mt-2">
+            <span>🔒 Security tracking active - Your submission will be verified</span>
           </div>
         )}
       </div>
