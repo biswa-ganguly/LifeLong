@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './pages/Home/Home';
@@ -17,50 +18,53 @@ import HospitalPoliceLogin from './components/HospitalPoliceLogin';
 
 export default function App() {
   return (
-    <div className=''>
+    <div className='min-h-screen flex flex-col'>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/sign-in" element={<SignInPage />} />
+      <main className='flex-grow'>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/sign-in" element={<SignInPage />} />
 
-        <Route
-  path="/dashboard/user/:userId?"
-  element={
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  }
-/>
-        <Route
-          path="/donation"
-          element={
-            <ProtectedRoute>
-              <Donation />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/emergency"
-          element={
-            <ProtectedRoute>
-              <Emergency />
-            </ProtectedRoute>
-          }
-        />
-        
+          <Route
+    path="/dashboard/user/:userId?"
+    element={
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    }
+  />
+          <Route
+            path="/donation"
+            element={
+              <ProtectedRoute>
+                <Donation />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/emergency"
+            element={
+              <ProtectedRoute>
+                <Emergency />
+              </ProtectedRoute>
+            }
+          />
+          
 
-         <Route path="/register" element={<CommonRegistrationForm />} />
-          <Route path="/hospital-police-login" element={<HospitalPoliceLogin />} />
-          <Route path="/police/admin" element={<PoliceAdminDashboard />} />
-          <Route path="/hospital/admin/:hospitalId" element={<HospitalAdminDashboard />} />
+           <Route path="/register" element={<CommonRegistrationForm />} />
+            <Route path="/hospital-police-login" element={<HospitalPoliceLogin />} />
+            <Route path="/police/admin" element={<PoliceAdminDashboard />} />
+            <Route path="/hospital/admin/:hospitalId" element={<HospitalAdminDashboard />} />
 
 
-        {/* Catch-all route to redirect unknown paths to home */}
-        <Route path="*" element={<Navigate to="/" />} />
+          {/* Catch-all route to redirect unknown paths to home */}
+          <Route path="*" element={<Navigate to="/" />} />
 
-        
+          
 
-      </Routes>
+        </Routes>
+      </main>
+      <Footer />
     </div>
   );
 }
