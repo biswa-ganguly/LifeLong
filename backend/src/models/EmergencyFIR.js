@@ -26,6 +26,11 @@ const EmergencyFIRSchema = new mongoose.Schema({
     userId: { type: String, required: true }
   },
 
+  policeStation: {
+    id: { type: String, required: true },
+    name: { type: String, required: true }
+  },
+
   isApprovedByPolice: { type: Boolean, default: false },
 
   createdAt: { type: Date, default: Date.now }

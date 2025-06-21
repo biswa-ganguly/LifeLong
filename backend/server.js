@@ -11,7 +11,9 @@ import newhospitalRoute from "./src/routes/newhospitalRoute.js";
 import policestationRoute from "./src/routes/policeStationRoute.js";
 import donationRoutes from "./src/routes/donationRoutes.js";
 import { loadHospitalsAtStartup } from "./src/services/loadHospitals.js";
+import { loadPoliceStationsAtStartup } from "./src/services/loadPoliceStations.js";
 import hospitalSearchRoute from "./src/routes/hospitalSearchRoute.js";
+import policeSearchRouter from "./src/routes/policeSearch.js";
 import emergencyFIRRoutes from './src/routes/emergencyFIRRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
 
@@ -41,6 +43,7 @@ app.use("/api/police", policestationRoute);
 app.use("/api/donations", donationRoutes);
 app.use("/api", hospitalFetchRoute);
 app.use("/api", hospitalSearchRoute);
+app.use("/api", policeSearchRouter);
 app.use('/api', uploadRoutes);
 
 // Health check
@@ -57,6 +60,7 @@ async function startServer() {
 
     // Pre-load hospital data
     await loadHospitalsAtStartup();
+    await loadPoliceStationsAtStartup();
 
     // Start listening
     const PORT = process.env.PORT || 3000;
