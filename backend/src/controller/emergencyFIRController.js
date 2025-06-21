@@ -33,6 +33,7 @@ export const launchEmergencyFIR = async (req, res) => {
       photoUrl,
       reporter: {
         ...reporter,
+        relation: reporter.relation || 'Witness',
         userId
       },
       policeStation: {

@@ -58,8 +58,9 @@ function Emergency() {
     longitude: '',
     initialObservations: '',
     photoUrl: '',
-    isAnonymous: false,
+    isAnonymous: true,
     reporterName: '',
+    reporterRelation: '',
     policeStationId: '',
     policeStationName: ''
   });
@@ -408,15 +409,15 @@ function Emergency() {
         },
         initialObservations: formData.initialObservations,
         photoUrl: uploadedImageUrl,
+        reporter: {
+          isAnonymous: formData.isAnonymous,
+          name: formData.isAnonymous ? 'Anonymous' : formData.reporterName,
+          relation: formData.isAnonymous ? 'Witness' : formData.reporterRelation,
+          userId: user ? user.id : 'anonymous_user'
+        },
         policeStation: {
           id: formData.policeStationId,
           name: formData.policeStationName
-        },
-        reporter: {
-          isAnonymous: formData.isAnonymous,
-          name: formData.isAnonymous ? '' : formData.reporterName,
-          phone: user?.phoneNumbers?.[0]?.phoneNumber || '',
-          userId: user?.id || 'anonymous'
         }
       };
 
@@ -456,8 +457,9 @@ function Emergency() {
         longitude: '',
         initialObservations: '',
         photoUrl: '',
-        isAnonymous: false,
+        isAnonymous: true,
         reporterName: '',
+        reporterRelation: '',
         policeStationId: '',
         policeStationName: ''
       });
@@ -766,38 +768,71 @@ function Emergency() {
           )}
         </div>
 
-        {/* Anonymity & Name */}
-        <div>
-          <label className="flex items-center gap-2">
-            <input 
-              type="checkbox" 
-              name="isAnonymous" 
-              checked={formData.isAnonymous} 
-              onChange={handleChange} 
-            />
-            Report Anonymously
-          </label>
-        </div>
-
-        {!formData.isAnonymous && (
-          <div>
-            <label className="block mb-1 font-medium">Your Name: *</label>
-            <div className="flex gap-2">
-              <input 
-                type="text" 
-                name="reporterName" 
-                value={formData.reporterName} 
-                onChange={handleChange} 
-                className="flex-1 border p-2 rounded" 
-                required={!formData.isAnonymous} 
-              />
-              <VoiceInputButton fieldName="reporterName" />
+        {/* Reporter Details */}
+        <fieldset className="border border-gray-300 p-4 rounded-md">
+          <legend className="text-lg font-semibold text-gray-800 px-2">Reporter Details</legend>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="isAnonymous"
+                  name="isAnonymous"
+                  type="checkbox"
+                  checked={formData.isAnonymous}
+                  onChange={handleChange}
+                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="isAnonymous" className="font-medium text-gray-700">
+                  I want to report anonymously
+                </label>
+                <p className="text-gray-500">Your name and relation will not be recorded.</p>
+              </div>
             </div>
-            {formErrors.reporterName && (
-              <p className="text-red-500 text-sm mt-1">{formErrors.reporterName}</p>
+
+            {!formData.isAnonymous && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
+                <div>
+                  <label htmlFor="reporterName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                     <input
+                       type="text"
+                       id="reporterName"
+                       name="reporterName"
+                       value={formData.reporterName}
+                       onChange={handleChange}
+                       required={!formData.isAnonymous}
+                       className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Enter your name..."
+                     />
+                     <VoiceInputButton fieldName="reporterName" />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="reporterRelation" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Relation to Victim <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      id="reporterRelation"
+                      name="reporterRelation"
+                      value={formData.reporterRelation}
+                      onChange={handleChange}
+                      required={!formData.isAnonymous}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g., Father, Friend, Sibling..."
+                    />
+                    <VoiceInputButton fieldName="reporterRelation" />
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-        )}
+        </fieldset>
 
         <button 
           type="button" 

@@ -23,6 +23,7 @@ const EmergencyFIRSchema = new mongoose.Schema({
     isAnonymous: { type: Boolean, default: true },
     name: { type: String, default: '' },
     phone: { type: String, default: '' },
+    relation: { type: String, default: 'Witness' },
     userId: { type: String, required: true }
   },
 
