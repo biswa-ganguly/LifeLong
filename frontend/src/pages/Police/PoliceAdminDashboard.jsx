@@ -12,14 +12,12 @@ function PoliceAdminDashboard() {
       const res = await fetch(`http://localhost:3000/api/emergency-firs/${policeId}`);
       const data = await res.json();
 
-      console.log("Fetched emergency FIRs:", data); // Debug
-
       if (Array.isArray(data)) {
         setEmergencyFIRs(data);
         setMessage('');
       } else if (data.message) {
         setEmergencyFIRs([]);
-        setMessage(data.message); // Use backend's message
+        setMessage(data.message);
       }
     } catch (err) {
       console.error(err);
@@ -35,20 +33,33 @@ function PoliceAdminDashboard() {
   }, [policeId]);
 
   const updateApproval = async (id, isApproved) => {
+    const action = isApproved ? 'approve' : 'reject';
+    const note = prompt(`Enter a note for ${action.toUpperCase()}:`);
+
+    if (note === null) return; // User cancelled
+
     try {
-      const res = await fetch(`http://localhost:3000/api/emergency-firs/${id}/approval`, {
-        method: 'PUT',
+      const res = await fetch(`http://localhost:3000/api/emergency-firs/status/${id}`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isApprovedByPolice: isApproved }),
+        body: JSON.stringify({ action, note }),
       });
 
-      const updated = await res.json();
-      setEmergencyFIRs((prev) =>
-        prev.map((fir) => (fir._id === updated._id ? updated : fir))
-      );
+      console.log(JSON.stringify({ action, note }));
+
+      const result = await res.json();
+
+      if (res.ok) {
+        setEmergencyFIRs((prev) =>
+          prev.map((fir) => (fir._id === result.fir._id ? result.fir : fir))
+        );
+      } else {
+        console.error(result);
+        setMessage(result.message || 'Failed to update FIR status');
+      }
     } catch (err) {
       console.error(err);
-      setMessage('Failed to update approval status');
+      setMessage('Error while updating FIR status');
     }
   };
 
@@ -75,11 +86,9 @@ function PoliceAdminDashboard() {
               }`}
             >
               <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
-                
-                {/* Main FIR Information */}
+
+                {/* FIR Details */}
                 <div className="flex-grow space-y-4">
-                  
-                  {/* Header with incident type and status */}
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <h3 className="text-xl font-semibold text-gray-800">
                       {fir.incidentType}
@@ -116,7 +125,7 @@ function PoliceAdminDashboard() {
                     </div>
                   )}
 
-                  {/* Location Details */}
+                  {/* Location */}
                   {fir.incidentLocation && (
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-gray-700 mb-2">Incident Location:</h4>
@@ -141,7 +150,7 @@ function PoliceAdminDashboard() {
                     </div>
                   )}
 
-                  {/* Initial Observations */}
+                  {/* Observations */}
                   {fir.initialObservations && (
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-gray-700 mb-2">Initial Observations:</h4>
@@ -149,7 +158,7 @@ function PoliceAdminDashboard() {
                     </div>
                   )}
 
-                  {/* Reporter Information */}
+                  {/* Reporter Info */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-700 mb-2">Reporter Information:</h4>
                     <div className="text-sm space-y-1">
@@ -164,7 +173,7 @@ function PoliceAdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Photo Evidence */}
+                  {/* Photo */}
                   {fir.photoUrl && (
                     <div className="bg-red-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-gray-700 mb-2">Evidence Photo:</h4>
@@ -178,7 +187,7 @@ function PoliceAdminDashboard() {
                   )}
                 </div>
 
-                {/* Action Buttons */}
+                {/* Approve / Reject */}
                 {!fir.isApprovedByPolice && (
                   <div className="flex flex-col gap-3 lg:min-w-[200px]">
                     <button
@@ -187,12 +196,12 @@ function PoliceAdminDashboard() {
                     >
                       Approve FIR
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => updateApproval(fir._id, false)}
                       className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold"
                     >
                       Reject FIR
-                    </button>
+                    </button> */}
                   </div>
                 )}
               </div>
