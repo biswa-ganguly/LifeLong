@@ -6,7 +6,6 @@ export default function PoliceStationRegistrationForm() {
     username: "",
     password: "",
     stationName: "",
-    type: "",
     registrationNumber: "",
     zone: "",
     email: "",
@@ -34,8 +33,87 @@ export default function PoliceStationRegistrationForm() {
 
   const [detectingAddress, setDetectingAddress] = useState(false);
 
+  // Kolkata Police Jurisdiction by Zone
+  const jurisdictionOptions = {
+    "North": [
+      "Amherst Street",
+      "Bowbazar",
+      "Burrabazar",
+      "Chitpur",
+      "Cossipore",
+      "Girish Park",
+      "Jorabagan",
+      "Jorasanko",
+      "Manicktala",
+      "Narkeldanga",
+      "Shyampukur",
+      "Sinthee",
+      "Tala",
+      "Taltala",
+      "Ultadanga",
+      "Posta",
+      "Muchipara",
+      "Phoolbagan"
+    ],
+    "South": [
+      "Alipore",
+      "Ballygunge",
+      "Bhowanipore",
+      "Chetla",
+      "Gariahat",
+      "Kalighat",
+      "Lake",
+      "New Alipore",
+      "Park Street",
+      "Shakespeare Sarani",
+      "Tollygunge",
+      "Jadavpur",
+      "Charu Market",
+      "Parnasree",
+      "Rabindra Sarobar"
+    ],
+    "West": [
+      "Garden Reach",
+      "Ekbalpur",
+      "Watgunge",
+      "West Port",
+      "South Port",
+      "Metiabruz",
+      "Taratala",
+      "Hastings",
+      "Maidan",
+      "Topsia",
+      "Entally",
+      "Tangra"
+    ],
+    "East": [
+      "Beleghata",
+      "Narkeldanga",
+      "Phoolbagan",
+      "Ultadanga",
+      "Manicktala",
+      "Taltala",
+      "Bowbazar",
+      "Burrabazar",
+      "Posta",
+      "Muchipara"
+    ],
+    "Central": [
+      "Lalbazar",
+      "Bowbazar",
+      "Burrabazar",
+      "Posta",
+      "Muchipara",
+      "Jorasanko",
+      "Girish Park",
+      "Shyampukur",
+      "Amherst Street"
+    ]
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     // Handle nested fields
     if (name.startsWith("address.")) {
       const key = name.split(".")[1];
@@ -60,6 +138,14 @@ export default function PoliceStationRegistrationForm() {
         ...prev,
         [name]: value
       }));
+      
+      // Reset jurisdiction when zone changes
+      if (name === "zone") {
+        setFormData((prev) => ({
+          ...prev,
+          jurisdiction: ""
+        }));
+      }
     }
   };
 
@@ -72,7 +158,6 @@ export default function PoliceStationRegistrationForm() {
         username: "",
         password: "",
         stationName: "",
-        type: "",
         registrationNumber: "",
         zone: "",
         email: "",
@@ -154,16 +239,19 @@ export default function PoliceStationRegistrationForm() {
           <input type="text" name="stationName" value={formData.stationName} onChange={handleChange} required className="w-full p-2 border rounded" />
         </div>
         <div>
-          <label>Type</label>
-          <input type="text" name="type" value={formData.type} onChange={handleChange} required className="w-full p-2 border rounded" placeholder="e.g. City Police" />
-        </div>
-        <div>
           <label>Registration Number</label>
           <input type="text" name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} required className="w-full p-2 border rounded" />
         </div>
         <div>
           <label>Zone</label>
-          <input type="text" name="zone" value={formData.zone} onChange={handleChange} required className="w-full p-2 border rounded" />
+          <select name="zone" value={formData.zone} onChange={handleChange} required className="w-full p-2 border rounded">
+            <option value="">-- Select Zone --</option>
+            <option value="North">North Kolkata Zone</option>
+            <option value="South">South Kolkata Zone</option>
+            <option value="West">West Kolkata Zone</option>
+            <option value="East">East Kolkata Zone</option>
+            <option value="Central">Central Kolkata Zone</option>
+          </select>
         </div>
         <div>
           <label>Email</label>
@@ -206,7 +294,23 @@ export default function PoliceStationRegistrationForm() {
         </fieldset>
         <div>
           <label>Jurisdiction</label>
-          <input type="text" name="jurisdiction" value={formData.jurisdiction} onChange={handleChange} required className="w-full p-2 border rounded" placeholder="Comma separated areas" />
+          <select 
+            name="jurisdiction" 
+            value={formData.jurisdiction} 
+            onChange={handleChange} 
+            required 
+            className="w-full p-2 border rounded"
+            disabled={!formData.zone}
+          >
+            <option value="">
+              {formData.zone ? `-- Select ${formData.zone} Kolkata Jurisdiction --` : "-- Please select a zone first --"}
+            </option>
+            {formData.zone && jurisdictionOptions[formData.zone]?.map((area) => (
+              <option key={area} value={area}>
+                {area}
+              </option>
+            ))}
+          </select>
         </div>
         <fieldset className="border p-2 rounded">
           <legend className="font-semibold">Documents (URLs)</legend>
