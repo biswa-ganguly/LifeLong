@@ -4,6 +4,7 @@ import axios from 'axios';
 const VolunteerRegistration = () => {
   const [formData, setFormData] = useState({
     name: '',
+    phone: '',
   });
   const [location, setLocation] = useState(null);
   const [error, setError] = useState('');
@@ -49,16 +50,18 @@ const VolunteerRegistration = () => {
     setError('');
     setSuccess('');
 
-    if (!formData.name || !location) {
-      setError('Please provide your name and allow location access.');
+    if (!formData.name || !formData.phone || !location) {
+      setError('Please provide your name, phone number, and allow location access.');
       setLoading(false);
       return;
     }
 
     try {
-      // These would come from your auth and push notification setup
-      // You should replace these with actual data from your application's state
-      const userId = 'placeholder-user-id'; // From auth context
+      // In a real application, the userId would come from your auth context (e.g., useAuth from Clerk).
+      // For demonstration purposes, we generate a unique ID for each registration to avoid conflicts.
+      const userId = `volunteer-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
+      // The deviceToken would come from a push notification service like Firebase Cloud Messaging (FCM).
       const deviceToken = 'placeholder-device-token'; // From FCM
 
       const volunteerData = {
@@ -69,16 +72,16 @@ const VolunteerRegistration = () => {
         isActive: true,
       };
       
-      // TODO: Replace with your actual API endpoint for registering volunteers
-      // const response = await axios.post('/api/volunteer/register', volunteerData);
-      console.log('Submitting volunteer data:', volunteerData);
+      const response = await axios.post('http://localhost:3000/api/volunteers', volunteerData);
       
-      // Mocking API call for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (response.data.success) {
+        setSuccess('You have been registered as a volunteer!');
+        setFormData({ name: '', phone: '' });
+      } else {
+        // This case might not be hit if backend always throws errors for failures
+        setError(response.data.message || 'An unknown error occurred.');
+      }
 
-      setSuccess('You have been registered as a volunteer!');
-      setFormData({ name: '' });
-      // location is kept, user might want to see it or resubmit
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred during registration.');
     } finally {
@@ -109,7 +112,7 @@ const VolunteerRegistration = () => {
         )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="name" className="sr-only">
                 Full Name
@@ -121,8 +124,23 @@ const VolunteerRegistration = () => {
                 required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Full Name"
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className="sr-only">
+                Phone Number
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                required
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Phone Number"
               />
             </div>
           </div>

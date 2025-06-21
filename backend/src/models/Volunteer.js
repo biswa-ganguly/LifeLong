@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const VolunteerSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
+  phone: { type: String, required: true, unique: true },
   deviceToken: { type: String, required: true }, // For FCM push notifications
   location: {
     type: { type: String, default: "Point" },
