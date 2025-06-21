@@ -154,7 +154,6 @@ function Emergency() {
     };
   }, []);
 
-  // Search police stations by name only
   const searchPoliceStations = debounce(async (query) => {
     if (!query || query.length < 2) {
       setPoliceStations([]);
@@ -163,18 +162,10 @@ function Emergency() {
 
     try {
       setLoadingStations(true);
-      // Mock data for demo purposes
-      const mockStations = [
-        { id: '1', name: 'Central Police Station', district: 'Downtown', city: 'Mumbai' },
-        { id: '2', name: 'East Police Station', district: 'Eastern District', city: 'Mumbai' },
-        { id: '3', name: 'West Police Station', district: 'Western District', city: 'Mumbai' }
-      ];
+      const response = await fetch(`http://localhost:3000/api/police/search?name=${encodeURIComponent(query)}`);
+      const data = await response.json();
       
-      const filteredStations = mockStations.filter(station => 
-        station.name.toLowerCase().includes(query.toLowerCase())
-      );
-      
-      const transformedStations = filteredStations.map(station => ({
+      const transformedStations = data.map(station => ({
         _id: station.id,
         stationName: station.name,
         address: {
