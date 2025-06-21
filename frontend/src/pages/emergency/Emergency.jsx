@@ -363,7 +363,7 @@ function Emergency() {
         isAnonymousReport: firData.reporter.isAnonymous
       };
 
-      const response = await fetch('http://localhost:3000/api/track-device', {
+      const response = await fetch('http://localhost:3000/api/emergency-fir', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

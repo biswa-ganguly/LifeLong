@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Get FCM Token</title>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+  <script>
+    // Replace with your Firebase config (from Firebase Console > Project Settings)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWBhum16lwheuLT8WGKHVjSCno_Ha2FA4",
+        authDomain: "emergency-app-ec4e3.firebaseapp.com",
+        projectId: "emergency-app-ec4e3",
+        storageBucket: "emergency-app-ec4e3.firebasestorage.app",
+        messagingSenderId: "753417943673",
+        appId: "1:753417943673:web:ced67c4b0eb6cc0da832a8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    async function getToken() {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const token = await messaging.getToken();
+          console.log("FCM Token:", token);
+          document.getElementById("token").innerText = token;
+        } else {
+          alert("Allow notifications to get a token!");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  </script>
+</head>
+<body>
+  <button onclick="getToken()">Get FCM Token</button>
+  <p id="token" style="word-break: break-all;"></p>
+</body>
+</html>
