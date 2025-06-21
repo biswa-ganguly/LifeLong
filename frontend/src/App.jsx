@@ -53,7 +53,7 @@ export default function App() {
 
            <Route path="/register" element={<CommonRegistrationForm />} />
             <Route path="/hospital-police-login" element={<HospitalPoliceLogin />} />
-            <Route path="/police/admin" element={<PoliceAdminDashboard />} />
+            <Route path="/police/admin/:policeId" element={<PoliceAdminDashboard />} />
             <Route path="/hospital/admin/:hospitalId" element={<HospitalAdminDashboard />} />
 
 
