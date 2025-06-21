@@ -15,6 +15,7 @@ import HospitalAdminDashboard from './pages/Hospital/AdminDashboard';
 import PoliceAdminDashboard from './pages/Police/PoliceAdminDashboard';
 import CommonRegistrationForm from './components/CommonRegistrationForm';
 import HospitalPoliceLogin from './components/HospitalPoliceLogin';
+import VolunteerRegistration from './pages/volunteer/VolunteerRegistration';
 
 export default function App() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/volunteer/register" element={<VolunteerRegistration />} />
           
 
            <Route path="/register" element={<CommonRegistrationForm />} />
