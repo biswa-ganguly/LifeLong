@@ -134,37 +134,53 @@ export const submitEmergencyFIR = async (req, res) => {
 };
 
 // Additional endpoint to update status to Approved
-export const approveFIR = async (req, res) => {
+export const updateFIRStatus = async (req, res) => {
+  const { firId } = req.params;
+  const { action, note } = req.body;
+
+  if (!['approve', 'reject'].includes(action)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid action. Must be "approve" or "reject".'
+    });
+  }
+
+  const newStatus = action === 'approve' ? 'Approved' : 'Rejected';
+  const approvalFlag = action === 'approve';
+
   try {
-    const { firId } = req.params;
-
-    const updatedFIR = await EmergencyFIR.findByIdAndUpdate(
-      firId,
-      { status: 'Approved', approvedAt: new Date() },
-      { new: true }
-    );
-
-    if (!updatedFIR) {
+    const fir = await EmergencyFIR.findById(firId);
+    if (!fir) {
       return res.status(404).json({
         success: false,
         message: 'FIR not found'
       });
     }
 
+    fir.status = newStatus;
+    fir.isApprovedByPolice = approvalFlag;
+
+    fir.statusHistory.push({
+      status: newStatus,
+      changedBy: 'police',
+      notes: note || `${newStatus} by police`,
+      timestamp: new Date()
+    });
+
+    await fir.save();
+
     res.status(200).json({
       success: true,
-      message: 'FIR approved successfully',
-      fir: updatedFIR
+      message: `FIR ${newStatus.toLowerCase()} successfully`,
+      fir
     });
 
   } catch (error) {
-    console.error('FIR approval error:', error);
+    console.error('Error updating FIR status:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to approve FIR',
-      error: process.env.NODE_ENV === 'development' 
-        ? error.message 
-        : 'Please try again later'
+      message: 'Failed to update FIR status',
+      error: error.message
     });
   }
 };

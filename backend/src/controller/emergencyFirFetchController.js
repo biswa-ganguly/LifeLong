@@ -7,7 +7,7 @@ export const getEmergencyFIRsByPolice = async (req, res) => {
   try {
     // Since your model doesn't have policeId field, we'll fetch all FIRs
     // You might want to add policeId field to your model or use a different filtering approach
-    const firs = await EmergencyFIR.find({}).sort({ createdAt: -1 }); // Sort by newest first
+    const firs = await EmergencyFIR.find({ 'policeStation.id':policeId }).sort({ createdAt: -1 }); // Sort by newest first
 
     if (!firs || firs.length === 0) {
       return res.status(404).json({ message: 'No emergency FIRs found.' });

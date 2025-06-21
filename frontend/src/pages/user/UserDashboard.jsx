@@ -132,9 +132,9 @@ function UserDashboard() {
                   <strong>Status:</strong>{' '}
                   <span
                     className={`font-semibold ${
-                      emergency.status === 'pending'
+                      emergency.status === 'Pending'
                         ? 'text-yellow-600'
-                        : emergency.status === 'accepted'
+                        : emergency.status === 'Approved'
                         ? 'text-green-600'
                         : 'text-red-600'
                     }`}

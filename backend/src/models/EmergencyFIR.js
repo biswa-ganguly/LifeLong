@@ -5,7 +5,6 @@ const EmergencyFIRSchema = new mongoose.Schema({
   incidentType: { 
     type: String, 
     required: true,
-    // enum: ['Accident', 'Assault', 'Missing Person', 'Theft','Hit and Run' ,'Other'],
     default: 'Accident'
   },
 
@@ -42,19 +41,19 @@ const EmergencyFIRSchema = new mongoose.Schema({
     },
     latitude: {
       type: Number,
-      required: function() {
+      required: function () {
         return this.incidentLocation.longitude !== undefined;
       }
     },
     longitude: {
       type: Number,
-      required: function() {
+      required: function () {
         return this.incidentLocation.latitude !== undefined;
       }
     },
     mapUrl: {
       type: String,
-      default: function() {
+      default: function () {
         if (this.incidentLocation.latitude && this.incidentLocation.longitude) {
           return `https://maps.google.com/?q=${this.incidentLocation.latitude},${this.incidentLocation.longitude}`;
         }
@@ -79,7 +78,7 @@ const EmergencyFIRSchema = new mongoose.Schema({
   photoUrl: { 
     type: String,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(v);
       },
       message: props => `${props.value} is not a valid URL!`
@@ -108,7 +107,7 @@ const EmergencyFIRSchema = new mongoose.Schema({
     phone: { 
       type: String,
       validate: {
-        validator: function(v) {
+        validator: function (v) {
           return /^[0-9]{10,15}$/.test(v);
         },
         message: props => `${props.value} is not a valid phone number!`
@@ -116,8 +115,7 @@ const EmergencyFIRSchema = new mongoose.Schema({
     },
     relation: { 
       type: String, 
-      default: 'Witness',
-      //enum: ['Witness', 'Relative', 'Friend', 'Officer', 'Other']
+      default: 'Witness'
     },
     userId: { 
       type: String, 
@@ -145,16 +143,16 @@ const EmergencyFIRSchema = new mongoose.Schema({
     contactNumber: String
   },
 
-  // Status Tracking - Updated to only allow Pending or Approved
+  // Status Tracking
   status: {
     type: String,
-    enum: ['Pending', 'Approved'],
+    enum: ['Pending', 'Approved', 'Rejected'],  // ✅ Added 'Rejected'
     default: 'Pending'
   },
   statusHistory: [{
     status: {
       type: String,
-      enum: ['Pending', 'Approved']
+      enum: ['Pending', 'Approved', 'Rejected'],  // ✅ Added 'Rejected'
     },
     changedBy: String,
     timestamp: {
@@ -194,13 +192,13 @@ const EmergencyFIRSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Update virtual property for active status
-EmergencyFIRSchema.virtual('isActive').get(function() {
-  return this.status === 'Pending'; // Only pending FIRs are considered active
+// Virtual property for active status
+EmergencyFIRSchema.virtual('isActive').get(function () {
+  return this.status === 'Pending';
 });
 
 // Pre-save hook to update status history
-EmergencyFIRSchema.pre('save', function(next) {
+EmergencyFIRSchema.pre('save', function (next) {
   if (this.isModified('status')) {
     this.statusHistory = this.statusHistory || [];
     this.statusHistory.push({
@@ -212,7 +210,7 @@ EmergencyFIRSchema.pre('save', function(next) {
   next();
 });
 
-// Text index for searchable fields
+// Indexes for text search
 EmergencyFIRSchema.index({
   'deceasedDetails.name': 'text',
   'incidentLocation.address': 'text',
