@@ -9,6 +9,14 @@ function Navbar() {
   const { isSignedIn, user } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const scrollToFooter = () => {
+    const footer = document.querySelector('footer');
+    if (footer) {
+      footer.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMenuOpen(false);
+  };
+
   return (
     <>
       <Header />
@@ -26,7 +34,7 @@ function Navbar() {
             <Link to="/emergency" className="hover:underline">Emergency</Link>
             <Link to="/donation" className="hover:underline">Donation</Link>
             <Link to={isSignedIn ? `/dashboard/user/${user?.id}` : "/dashboard/user"} className="hover:underline">Dashboard</Link>
-            <Link to="/contacts" className="hover:underline">Contacts</Link>
+            <button onClick={scrollToFooter} className="hover:underline bg-transparent border-none text-white cursor-pointer">Contacts</button>
             
             {isSignedIn ? (
               <div className="flex items-center gap-3">
@@ -69,7 +77,7 @@ function Navbar() {
             <Link to="/emergency" className="text-gray-800 hover:bg-gray-100 p-2 rounded" onClick={() => setIsMenuOpen(false)}>Emergency</Link>
             <Link to="/donation" className="text-gray-800 hover:bg-gray-100 p-2 rounded" onClick={() => setIsMenuOpen(false)}>Donation</Link>
             <Link to={isSignedIn ? `/dashboard/user/${user?.id}` : "/dashboard/user"} className="text-gray-800 hover:bg-gray-100 p-2 rounded" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
-            <Link to="/contacts" className="text-gray-800 hover:bg-gray-100 p-2 rounded" onClick={() => setIsMenuOpen(false)}>Contacts</Link>
+            <button onClick={scrollToFooter} className="text-left text-gray-800 hover:bg-gray-100 p-2 rounded bg-transparent border-none cursor-pointer">Contacts</button>
             
             {isSignedIn ? (
               <div className="mt-4 flex items-center gap-3 border-t pt-4">
