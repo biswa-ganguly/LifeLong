@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser, UserButton, SignInButton } from '@clerk/clerk-react';
 import { Menu, X } from 'lucide-react';
-import logo from '/logo.svg';
+import logo from '/gg2.svg';
 import Header from './Header';
 
 function Navbar() {
@@ -20,7 +20,7 @@ function Navbar() {
   return (
     <>
       <Header />
-      <nav className="sticky top-0 bg-[#0052CC] text-white px-12 py-4 z-50">
+      <nav className="sticky top-0 z-50 px-12 py-4 text-[#0052CC] bg-white">
 
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -35,7 +35,7 @@ function Navbar() {
             <Link to="/donation" className="hover:underline">Donation</Link>
             <Link to="/volunteer/register" className="hover:underline">Become a Volunteer</Link>
             <Link to={isSignedIn ? `/dashboard/user/${user?.id}` : "/dashboard/user"} className="hover:underline">Dashboard</Link>
-            <button onClick={scrollToFooter} className="hover:underline bg-transparent border-none text-white cursor-pointer">Contacts</button>
+            <button onClick={scrollToFooter} className="hover:underline bg-transparent border-none  cursor-pointer">Contacts</button>
             
             {isSignedIn ? (
               <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ function Navbar() {
               </div>
             ) : (
               <SignInButton mode="modal">
-                <button className="mt-4 w-full text-center bg-[#0052CC] text-white px-4 py-2 rounded-md font-medium hover:bg-[#0047B3] transition-colors">
+                <button className="mt-4 w-full text-center bg-[#0052CC]  px-4 py-2 rounded-md font-medium hover:bg-[#0047B3] transition-colors">
                   Sign In
                 </button>
               </SignInButton>
