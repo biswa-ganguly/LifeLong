@@ -41,3 +41,20 @@ export const updateEmergencyFIRApproval = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const getEmergencyFIRsByUser = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const firs = await EmergencyFIR.find({ 'reporter.userId': userId }).sort({ createdAt: -1 });
+
+    if (!firs || firs.length === 0) {
+      return res.status(404).json({ message: 'No emergency FIRs found.' });
+    }
+
+    res.status(200).json(firs);
+  } catch (error) {
+    console.error('Error fetching emergency FIRs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

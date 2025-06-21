@@ -17,11 +17,13 @@ export const submitEmergencyFIR = async (req, res) => {
       reporterName,
       reporterRelation,
       policeStationId,
-      policeStationName
+      policeStationName,
+      ipAddress,
+      userId
     } = req.body;
 
     // Get user ID from authentication middleware
-    const userId = req.user?.id || 'anonymous';
+    const userID = userId || 'anonymous';
 
     // Validate required fields
     const requiredFields = {
@@ -66,7 +68,8 @@ export const submitEmergencyFIR = async (req, res) => {
       isAnonymous: isAnonymous || false,
       name: isAnonymous ? 'Anonymous' : (reporterName || 'Unknown'),
       relation: isAnonymous ? 'Witness' : (reporterRelation || 'Witness'),
-      userId
+      userId:userID,
+      ipAddress:ipAddress
     };
 
     // Create the FIR record with initial "Pending" status

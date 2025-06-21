@@ -117,7 +117,7 @@ const EmergencyFIRSchema = new mongoose.Schema({
     relation: { 
       type: String, 
       default: 'Witness',
-      enum: ['Witness', 'Relative', 'Friend', 'Officer', 'Other']
+      //enum: ['Witness', 'Relative', 'Friend', 'Officer', 'Other']
     },
     userId: { 
       type: String, 
