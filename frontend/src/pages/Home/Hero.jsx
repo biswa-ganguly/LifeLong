@@ -21,7 +21,7 @@ function Hero() {
   {/* Row 1 - Two Full Width Buttons Side by Side on Larger Screens */}
   <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
     <Link
-      to="/register"
+      to="/donation"
       className="w-full bg-[#0052CC] text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-[#0047B3] transition-all duration-300 shadow-md text-center"
     >
       Donation Portal
