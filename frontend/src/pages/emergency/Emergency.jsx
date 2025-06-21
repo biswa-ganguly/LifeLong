@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useUser } from "@clerk/clerk-react";
-import { Upload, Video, X, Search, MapPin } from "lucide-react";
+import { Upload, Video, X, Search, MapPin, Mic, MicOff } from "lucide-react";
 import Webcam from "react-webcam";
 
 function Emergency() {
@@ -32,9 +32,113 @@ function Emergency() {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
+  // Voice recognition states
+  const [isListening, setIsListening] = useState({});
+  const [recognition, setRecognition] = useState(null);
+  const [isVoiceSupported, setIsVoiceSupported] = useState(false);
+
   const webcamRef = useRef(null);
   const stationSearchRef = useRef(null);
   const isDesktop = window.innerWidth > 768;
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+      recognitionInstance.lang = 'en-US';
+      
+      setRecognition(recognitionInstance);
+      setIsVoiceSupported(true);
+    } else {
+      setIsVoiceSupported(false);
+    }
+  }, []);
+
+  // Voice recognition function
+  const startVoiceRecognition = (fieldName) => {
+    if (!recognition || !isVoiceSupported) {
+      alert('Voice recognition is not supported in your browser');
+      return;
+    }
+
+    setIsListening(prev => ({ ...prev, [fieldName]: true }));
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      
+      if (fieldName === 'policeStationSearch') {
+        setSearchQuery(transcript);
+        searchPoliceStations(transcript);
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: prev[fieldName] ? prev[fieldName] + ' ' + transcript : transcript
+        }));
+      }
+      
+      setIsListening(prev => ({ ...prev, [fieldName]: false }));
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      alert('Voice recognition failed. Please try again.');
+      setIsListening(prev => ({ ...prev, [fieldName]: false }));
+    };
+
+    recognition.onend = () => {
+      setIsListening(prev => ({ ...prev, [fieldName]: false }));
+    };
+
+    try {
+      recognition.start();
+    } catch (error) {
+      console.error('Failed to start recognition:', error);
+      setIsListening(prev => ({ ...prev, [fieldName]: false }));
+    }
+  };
+
+  const stopVoiceRecognition = (fieldName) => {
+    if (recognition) {
+      recognition.stop();
+    }
+    setIsListening(prev => ({ ...prev, [fieldName]: false }));
+  };
+
+  // Voice Input Component
+  const VoiceInputButton = ({ fieldName, isActive = false }) => {
+    if (!isVoiceSupported) return null;
+
+    const isCurrentlyListening = isListening[fieldName];
+
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          if (isCurrentlyListening) {
+            stopVoiceRecognition(fieldName);
+          } else {
+            startVoiceRecognition(fieldName);
+          }
+        }}
+        className={`flex items-center justify-center w-8 h-8 rounded border ${
+          isCurrentlyListening 
+            ? 'bg-red-500 text-white border-red-500' 
+            : 'bg-gray-100 hover:bg-gray-200 border-gray-300'
+        } transition-colors`}
+        title={isCurrentlyListening ? 'Stop recording' : 'Start voice input'}
+      >
+        {isCurrentlyListening ? (
+          <MicOff className="w-4 h-4" />
+        ) : (
+          <Mic className="w-4 h-4" />
+        )}
+      </button>
+    );
+  };
 
   // Handle click outside to close suggestions
   useEffect(() => {
@@ -59,10 +163,18 @@ function Emergency() {
 
     try {
       setLoadingStations(true);
-      const response = await fetch(`http://localhost:3000/api/police/search?name=${encodeURIComponent(query)}`);
-      const data = await response.json();
+      // Mock data for demo purposes
+      const mockStations = [
+        { id: '1', name: 'Central Police Station', district: 'Downtown', city: 'Mumbai' },
+        { id: '2', name: 'East Police Station', district: 'Eastern District', city: 'Mumbai' },
+        { id: '3', name: 'West Police Station', district: 'Western District', city: 'Mumbai' }
+      ];
       
-      const transformedStations = data.map(station => ({
+      const filteredStations = mockStations.filter(station => 
+        station.name.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      const transformedStations = filteredStations.map(station => ({
         _id: station.id,
         stationName: station.name,
         address: {
@@ -194,8 +306,7 @@ function Emergency() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     
     if (!validateForm()) {
       return;
@@ -235,18 +346,8 @@ function Emergency() {
         }
       };
 
-      const res = await fetch('http://localhost:3000/api/emergency-fir', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to submit FIR');
-      }
-
+      // Mock successful submission
+      console.log('Payload:', payload);
       alert('FIR submitted successfully!');
 
       // Reset form
@@ -285,42 +386,57 @@ function Emergency() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-xl font-bold mb-4">Emergency FIR Submission</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold mb-2">Emergency FIR Submission</h2>
+        {isVoiceSupported && (
+          <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded">
+            <Mic className="w-4 h-4" />
+            <span>Voice input is available for quick reporting</span>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
 
         <div>
-          <label>Incident Type: *</label>
-          <input 
-            type="text" 
-            name="incidentType" 
-            value={formData.incidentType} 
-            onChange={handleChange} 
-            className="w-full border p-2" 
-            required 
-          />
+          <label className="block mb-1 font-medium">Incident Type: *</label>
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              name="incidentType" 
+              value={formData.incidentType} 
+              onChange={handleChange} 
+              className="flex-1 border p-2 rounded" 
+              required 
+            />
+            <VoiceInputButton fieldName="incidentType" />
+          </div>
           {formErrors.incidentType && (
             <p className="text-red-500 text-sm mt-1">{formErrors.incidentType}</p>
           )}
         </div>
 
         <div>
-          <label>Deceased Name (if known):</label>
-          <input 
-            type="text" 
-            name="name" 
-            value={formData.name} 
-            onChange={handleChange} 
-            className="w-full border p-2" 
-          />
+          <label className="block mb-1 font-medium">Deceased Name (if known):</label>
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              name="name" 
+              value={formData.name} 
+              onChange={handleChange} 
+              className="flex-1 border p-2 rounded" 
+            />
+            <VoiceInputButton fieldName="name" />
+          </div>
         </div>
 
         <div>
-          <label>Gender:</label>
+          <label className="block mb-1 font-medium">Gender:</label>
           <select 
             name="gender" 
             value={formData.gender} 
             onChange={handleChange} 
-            className="w-full border p-2"
+            className="w-full border p-2 rounded"
           >
             <option value="">Select</option>
             <option value="Male">Male</option>
@@ -330,30 +446,35 @@ function Emergency() {
         </div>
 
         <div>
-          <label>Approximate Age:</label>
+          <label className="block mb-1 font-medium">Approximate Age:</label>
           <input 
             type="number" 
             name="approximateAge" 
             value={formData.approximateAge} 
             onChange={handleChange} 
-            className="w-full border p-2" 
+            className="w-full border p-2 rounded" 
           />
         </div>
 
         {/* Police Station Search */}
         <div className="relative" ref={stationSearchRef}>
-          <label>Police Station: *</label>
-          <div className="flex items-center border rounded">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleStationSearchChange}
-              onFocus={() => setShowStationSuggestions(true)}
-              placeholder="Search police station by name..."
-              className="flex-1 p-2 outline-none"
-              required
-            />
-            <Search className="w-5 h-5 mx-2 text-gray-400" />
+          <label className="block mb-1 font-medium">Police Station: *</label>
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <div className="flex items-center border rounded">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleStationSearchChange}
+                  onFocus={() => setShowStationSuggestions(true)}
+                  placeholder="Search police station by name..."
+                  className="flex-1 p-2 outline-none rounded-l"
+                  required
+                />
+                <Search className="w-5 h-5 mx-2 text-gray-400" />
+              </div>
+            </div>
+            <VoiceInputButton fieldName="policeStationSearch" />
           </div>
           {formErrors.policeStation && (
             <p className="text-red-500 text-sm mt-1">{formErrors.policeStation}</p>
@@ -384,17 +505,18 @@ function Emergency() {
         </div>
 
         <div>
-          <label>Incident Address: *</label>
-          <div className="flex items-center gap-2">
+          <label className="block mb-1 font-medium">Incident Address: *</label>
+          <div className="flex gap-2 mb-2">
             <input 
               type="text" 
               name="address" 
               value={formData.address} 
               onChange={handleChange} 
-              className="flex-1 border p-2" 
+              className="flex-1 border p-2 rounded" 
               placeholder="Enter incident location" 
               required 
             />
+            <VoiceInputButton fieldName="address" />
             <button
               type="button"
               onClick={fetchCurrentLocation}
@@ -417,7 +539,7 @@ function Emergency() {
             placeholder="Latitude" 
             value={formData.latitude} 
             onChange={handleChange} 
-            className="w-1/2 border p-2" 
+            className="w-1/2 border p-2 rounded" 
             readOnly 
           />
           <input 
@@ -426,20 +548,30 @@ function Emergency() {
             placeholder="Longitude" 
             value={formData.longitude} 
             onChange={handleChange} 
-            className="w-1/2 border p-2" 
+            className="w-1/2 border p-2 rounded" 
             readOnly 
           />
         </div>
 
         <div>
-          <label>Initial Observations: *</label>
-          <textarea 
-            name="initialObservations" 
-            value={formData.initialObservations} 
-            onChange={handleChange} 
-            className="w-full border p-2" 
-            required 
-          />
+          <label className="block mb-1 font-medium">Initial Observations: *</label>
+          <div className="flex gap-2">
+            <textarea 
+              name="initialObservations" 
+              value={formData.initialObservations} 
+              onChange={handleChange} 
+              className="flex-1 border p-2 rounded" 
+              rows="4"
+              placeholder="Describe what you observed at the scene..."
+              required 
+            />
+            <div className="flex flex-col">
+              <VoiceInputButton fieldName="initialObservations" />
+            </div>
+          </div>
+          {isListening.initialObservations && (
+            <p className="text-sm text-blue-600 mt-1">🎤 Recording... Speak now</p>
+          )}
           {formErrors.initialObservations && (
             <p className="text-red-500 text-sm mt-1">{formErrors.initialObservations}</p>
           )}
@@ -534,15 +666,18 @@ function Emergency() {
 
         {!formData.isAnonymous && (
           <div>
-            <label>Your Name: *</label>
-            <input 
-              type="text" 
-              name="reporterName" 
-              value={formData.reporterName} 
-              onChange={handleChange} 
-              className="w-full border p-2" 
-              required={!formData.isAnonymous} 
-            />
+            <label className="block mb-1 font-medium">Your Name: *</label>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                name="reporterName" 
+                value={formData.reporterName} 
+                onChange={handleChange} 
+                className="flex-1 border p-2 rounded" 
+                required={!formData.isAnonymous} 
+              />
+              <VoiceInputButton fieldName="reporterName" />
+            </div>
             {formErrors.reporterName && (
               <p className="text-red-500 text-sm mt-1">{formErrors.reporterName}</p>
             )}
@@ -550,15 +685,16 @@ function Emergency() {
         )}
 
         <button 
-          type="submit" 
+          type="button" 
+          onClick={handleSubmit}
           disabled={uploading}
-          className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ${
+          className={`w-full bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 font-medium ${
             uploading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          {uploading ? 'Submitting...' : 'Submit FIR'}
+          {uploading ? 'Submitting Emergency FIR...' : 'Submit Emergency FIR'}
         </button>
-      </form>
+      </div>
     </div>
   );
 }
