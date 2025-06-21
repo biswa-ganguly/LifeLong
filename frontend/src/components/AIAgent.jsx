@@ -30,7 +30,7 @@ Only include fields if mentioned, leave others empty.
 `;
 
     try {
-      const res = await axios.post('/api/gemini', { prompt });
+      const res = await axios.post('http://localhost:3000/api/gemini', { prompt });
       setResponse(res.data.response);
     } catch (error) {
       console.error(error);

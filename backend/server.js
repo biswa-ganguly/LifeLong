@@ -14,7 +14,7 @@ import { loadHospitalsAtStartup } from "./src/services/loadHospitals.js";
 import hospitalSearchRoute from "./src/routes/hospitalSearchRoute.js";
 import emergencyFIRRoutes from './src/routes/emergencyFIRRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
-import geminiRoute from './routes/gemini.js';
+import geminiRoute from './src/routes/gemini.js';
 
 dotenv.config();
 
