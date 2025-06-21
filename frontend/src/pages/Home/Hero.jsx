@@ -3,7 +3,7 @@ import heroImage from '../../assets/hero.svg';
 
 function Hero() {
   return (
-    <section className="bg-[#E3F2FD] lg:h-[80vh] flex items-center">
+    <section className="bg-gradient-to-b from-[#E3F2FD] via-[#E3F2FD] to-white lg:h-[80vh] flex items-center">
       <div className="container mx-auto px-6 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -66,25 +66,16 @@ function Hero() {
 
           {/* Right Image */}
           <div className="flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-2xl">
               <img
                 src={heroImage}
                 alt="LifeLong Hero"
-                className="w-full h-auto rounded-xl shadow-2xl"
+                className="w-full h-full rounded-xl "
               />
 
-              {/* Floating Icons */}
-              <div className="absolute -top-5 -right-5 w-14 h-14 bg-[#0052CC] rounded-full flex items-center justify-center shadow-xl">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              </div>
 
-              <div className="absolute -bottom-5 -left-5 w-12 h-12 bg-[#DC2625] rounded-full flex items-center justify-center shadow-xl">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-              </div>
+              
+              
             </div>
           </div>
         </div>

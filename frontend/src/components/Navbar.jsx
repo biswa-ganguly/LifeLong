@@ -12,7 +12,8 @@ function Navbar() {
   return (
     <>
       <Header />
-      <nav className="bg-[#0052CC] text-white px-12 py-4 relative z-50">
+      <nav className="sticky top-0 bg-[#0052CC] text-white px-12 py-4 z-50">
+
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-xl font-bold">
